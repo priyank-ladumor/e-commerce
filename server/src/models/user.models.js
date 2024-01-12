@@ -6,6 +6,7 @@ const userSchema = new Schema({
     email: { type: String, required: true, index: true, unique: true },
     password: { type: String, required: true },
     confirmPassword: { type: String },
+    isEmailVerified: { type: Boolean, default: false },
     phone: { type: String },
     address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
     paymentInfo: [{ type: mongoose.Schema.Types.ObjectId, ref: "Payment_Info" }],

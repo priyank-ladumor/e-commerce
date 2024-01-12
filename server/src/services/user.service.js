@@ -26,5 +26,18 @@ const findUserById = async (id) => {
     }
 }
 
+const findUserByToken = async (token) => {
+    try {
+        if (token) {
+            const user = User.findById(token)
+            return user
+        } else {
+            throw new Error({ msg: "user not found" })
+        }
+    } catch (error) {
+        throw new Error(error.message)
+    }
+}
 
-export { findUserById, findUserByEmail }
+
+export { findUserById, findUserByEmail, findUserByToken }
