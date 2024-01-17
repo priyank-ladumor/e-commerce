@@ -6,7 +6,12 @@ import { Product } from "../models/product.models.js"
 
 export const findCartItemById = async (cartItemId) => {
     try {
-
+        const cartItem = await CartItem.findOne({ cart: cartItemId })
+        if (cartItem) {
+            return cartItem;
+        } else {
+            throw new Error("cartItem not found")
+        }
     } catch (error) {
         throw new Error(error.message)
     }
