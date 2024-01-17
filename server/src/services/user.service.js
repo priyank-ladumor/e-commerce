@@ -1,3 +1,4 @@
+import { getUserIdFromToken } from "../middlewares/jwtProvider.js"
 import { User } from "../models/user.models.js"
 
 const findUserByEmail = async (email) => {
@@ -29,7 +30,8 @@ const findUserById = async (id) => {
 const findUserByToken = async (token) => {
     try {
         if (token) {
-            const user = User.findById(token)
+            const id = await getUserIdFromToken(token)
+            const user = await User.findById(id)
             return user
         } else {
             throw new Error({ msg: "user not found" })
@@ -38,6 +40,4 @@ const findUserByToken = async (token) => {
         throw new Error(error.message)
     }
 }
-
-
 export { findUserById, findUserByEmail, findUserByToken }

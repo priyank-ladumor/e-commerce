@@ -5,6 +5,7 @@ import { findUserByEmail, findUserById, findUserByToken } from "../services/user
 import * as fs from 'fs';
 import handlebars from "handlebars"
 import { sendEmail } from "../services/email.service.js";
+import { createCart } from "../services/cart.service.js";
 
 
 
@@ -20,7 +21,7 @@ const createUser = async (req, res) => {
 
     try {
         if (isUserExit) {
-            return res.send({ msg: "user email address is already used" })
+            return res.status(400).send({ msg: "user email address is already used" });
         } else {
             const user = await new User(items);
             const pass = await bcrypt.hash(password, 10);
@@ -42,7 +43,8 @@ const createUser = async (req, res) => {
                 }
                 const sendVerifyMail = await sendEmail(items)
             }
-            res.status(200).send({ msg: "user created successfully please check your email for verification", token: token })
+            await createCart(user);
+            res.status(200).send({ msg: "user created successfully please check your email for verification", token: token, name: user.firstName })
         }
     } catch (error) {
         return res.status(500).send({ msg: error.message });
@@ -56,25 +58,21 @@ const loginUser = async (req, res) => {
         password
     }
     try {
-        if (items) {
-            const user = await findUserByEmail(email)
+        const user = await findUserByEmail(email)
+        if (user) {
             if (user.isEmailVerified === true) {
-                if (user) {
-                    const isPassValid = await bcrypt.compare(password, user.password)
-                    if (isPassValid) {
-                        const token = generateToken(user._id)
-                        return res.status(200).send({ msg: "user login successfully", token })
-                    } else {
-                        return res.status(401).send({ msg: "user password doesn't match" })
-                    }
+                const isPassValid = await bcrypt.compare(password, user.password)
+                if (isPassValid) {
+                    const token = generateToken(user._id)
+                    return res.status(200).send({ msg: "user login successfully", token })
                 } else {
-                    return res.status(404).send({ msg: "user not exits" })
+                    return res.status(401).send({ msg: "user password doesn't match" })
                 }
             } else {
                 return res.status(403).send({ msg: "Please verify your account first" })
             }
         } else {
-            res.status(400)
+            return res.status(404).send({ msg: "user not exits" })
         }
     } catch (error) {
         res.status(500).send({ msg: error.message });
@@ -83,7 +81,6 @@ const loginUser = async (req, res) => {
 
 
 const userEmailVerifiedByToken = async (req, res) => {
-
     const { token } = req.params;
     if (token) {
         const userId = await getUserIdFromToken(token);
@@ -98,4 +95,29 @@ const userEmailVerifiedByToken = async (req, res) => {
     }
 }
 
-export { createUser, loginUser, userEmailVerifiedByToken }
+
+const getUserProfile = async (req, res) => {
+    const token = req.headers.authorization;
+    try {
+        if (token) {
+            const user = await findUserByToken(token)
+            res.send(user)
+            return res.status(200).send(user)
+        } else {
+            return res.status(401).send({})
+        }
+    } catch (error) {
+        return res.status(500).send({ msg: error.message })
+    }
+}
+
+const getAllUserProfile = async (req, res) => {
+    try {
+        const items = await User.find()
+        res.send(items)
+    } catch (error) {
+        return res.status(500).send({ msg: error.message })
+    }
+}
+
+export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, getAllUserProfile }
