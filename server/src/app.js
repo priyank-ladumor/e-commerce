@@ -2,7 +2,17 @@ import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser"
 import morgan from "morgan"
-import {userRouter} from "./routes/user.routes.js";
+import { userRouter } from "./routes/user.routes.js";
+import { adminOrderRouter } from "./routes/adminOrder.routes.js";
+import { cartRouter } from "./routes/cart.routes.js";
+import { cartItemRouter } from "./routes/cartItem.routes.js";
+import { orderRouter } from "./routes/order.routes.js";
+import { adminProductRouter } from "./routes/adminProduct.routes.js";
+import { productRouter } from "./routes/product.routes.js";
+import { reviewRouter } from "./routes/review.routes.js";
+import { ratingRouter } from "./routes/rating.routes.js";
+
+
 const app = express()
 
 app.use(cors({
@@ -16,5 +26,14 @@ app.use(morgan('default'))
 app.use(cookieParser())
 
 app.use('/user', userRouter)
+app.use('/admin/order', adminOrderRouter)
+app.use('/cart', cartRouter)
+app.use('/cartitem', cartItemRouter)
+app.use('/order', orderRouter)
+app.use('/admin/products', adminProductRouter)
+app.use('/products', productRouter)
+app.use('/review', reviewRouter)
+app.use('/rating', ratingRouter)
+
 
 export { app }
