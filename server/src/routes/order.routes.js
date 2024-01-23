@@ -1,7 +1,7 @@
 
 import express from "express"
-import { authenticate } from "../middlewares/authenticate";
-import { createOrderController, findOrderByIdController, orderHistoryController } from "../controllers/order.controllers";
+import { authenticate } from "../middlewares/authenticate.js";
+import { createOrderController, findOrderByIdController, orderHistoryController } from "../controllers/order.controllers.js";
 const orderRouter = express.Router()
 
 orderRouter

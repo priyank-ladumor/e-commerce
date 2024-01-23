@@ -1,4 +1,4 @@
-import { createOrder, findOrderById, userOrderHistory } from "../services/order.service";
+import { createOrder, findOrderById, userOrderHistory } from "../services/order.service.js";
 
 export const createOrderController = async (req, res) => {
     const user = req.user;

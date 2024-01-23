@@ -1,10 +1,10 @@
-import { addCartItem, findUserCart } from "../services/cart.service";
+import { addCartItem, findUserCart } from "../services/cart.service.js";
 
 
 export const findUserCartController = async (req, res) => {
     const user = req.user;
     try {
-        const cart = await findUserCart(user._id)
+        const cart = await findUserCart(user._id);
         return res.status(200).send(cart);
     } catch (error) {
         return res.status(500).send({ msg: error.message });

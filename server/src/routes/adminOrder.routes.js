@@ -1,6 +1,6 @@
 import express from "express"
-import { authenticate } from "../middlewares/authenticate";
-import { cancelOrderController, confirmOrderController, deleteOrderController, deliverOrderController, getAllOrderController, shipOrderController } from "../controllers/adminOrder.controllers";
+import { authenticate } from "../middlewares/authenticate.js";
+import { cancelOrderController, confirmOrderController, deleteOrderController, deliverOrderController, getAllOrderController, shipOrderController } from "../controllers/adminOrder.controllers.js";
 const adminOrderRouter = express.Router()
 
 adminOrderRouter

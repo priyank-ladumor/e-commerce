@@ -1,12 +1,10 @@
 import mongoose, { Schema } from "mongoose"
 
 const categorySchema = new Schema({
-
     name: { type: String, required: true, maxlength: 50 },
-    parentCategory: { type: Schema.Types.ObjectId, ref: "Category" },
-    level: { type: Number, required: true },
-
+    parentCategory: { type: Schema.Types.ObjectId, ref: "Categories" },
+    level: { type: Number, required: true }
 });
 
 
-export const Category = mongoose.model("Category", categorySchema);
+export const Categories = mongoose.model("Categories", categorySchema);

@@ -1,6 +1,6 @@
 import express from "express"
-import { authenticate } from "../middlewares/authenticate";
-import { removeCartItemController, updateCartItemController } from "../controllers/cartItem.controllers";
+import { authenticate } from "../middlewares/authenticate.js";
+import { removeCartItemController, updateCartItemController } from "../controllers/cartItem.controllers.js";
 const cartItemRouter = express.Router()
 
 cartItemRouter

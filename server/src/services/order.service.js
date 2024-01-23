@@ -1,6 +1,6 @@
 import { Address } from "../models/address.models.js"
 import { Order } from "../models/order.models.js"
-import { findUserCart } from "./cart.service"
+import { findUserCart } from "./cart.service.js"
 
 
 export const createOrder = async (user, shippAddress) => {

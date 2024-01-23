@@ -1,6 +1,6 @@
 import express from "express"
-import { authenticate } from "../middlewares/authenticate";
-import { createMultipleProdController, createProductController, deleteProductController, updateProductController } from "../controllers/product.controllers";
+import { authenticate } from "../middlewares/authenticate.js";
+import { createMultipleProdController, createProductController, deleteProductController, updateProductController } from "../controllers/product.controllers.js";
 const adminProductRouter = express.Router()
 
 adminProductRouter

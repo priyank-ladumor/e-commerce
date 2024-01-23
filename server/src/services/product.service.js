@@ -1,42 +1,48 @@
-import { set } from "mongoose";
-import { Category } from "../models/category.model"
-import { Product } from "../models/product.models";
+// import { set } from "mongoose";
+import { Categories } from "../models/category.model.js"
+import { Product } from "../models/product.models.js";
 
 
 export const createProduct = async (reqData) => {
-    let topLevel = await Category.find({ name: reqData.topLevelCategory });
+    let topLevel = await Categories.find({ name: reqData.topLevelCategory });
 
-    if (!topLevel) {
-        topLevel = new Category({
+    if (!topLevel || !(topLevel.length > 0)) {
+        const topLevel = await new Categories({
             name: reqData.topLevelCategory,
             level: 1
         })
+        await topLevel.save();
     }
 
-    let secondLevel = await Category.findOne({
+    let secondLevel = await Categories.findOne({
         name: reqData.secondLevelCategory,
-        parentCategory: topLevel._id
+        parentCategory: topLevel[0]._id
     })
 
     if (!secondLevel) {
-        secondLevel = new Category({
+        const secondLevel = new Categories({
             name: reqData.secondLevelCategory,
-            parentCategory: topLevel._id,
+            parentCategory: topLevel[0]._id,
             level: 2
         })
+        await secondLevel.save();
     }
 
-    let thirdLevel = await Category.findOne({
+    let thirdLevel = await Categories.findOne({
         name: reqData.thirdLevelCategory,
         parentCategory: secondLevel._id,
     })
+    console.log(secondLevel, "secondLevel");
+    console.log(thirdLevel, "thirdLevel bahar");
 
-    if (!thirdLevel) {
-        thirdLevel = new Category({
+    if (!thirdLevel?.length > 0) {
+        const thirdLevel = new Categories({
             name: reqData.thirdLevelCategory,
-            parentCategory: secondLevel, _id,
+            parentCategory: secondLevel._id,
             level: 3
         })
+        await thirdLevel.save();
+        console.log(thirdLevel, "thirdLevel");
     }
 
     const product = new Product({
@@ -80,13 +86,13 @@ export const getAllProduct = async (reqQuery) => {
 
     pageSize = pageSize || 12;
 
-    let query = Product.find().populate("Category");
+    let query = Product.find().populate("Categories");
 
     if (category) {
-        const exitCategory = await Category.findOne({ name: category });
+        const exitCategory = await Categories.findOne({ name: category });
 
         if (exitCategory) {
-            query = query.where('Category', exitCategory._id)
+            query = query.where('Categories', exitCategory._id)
         } else {
             return { content: [], currentPage: 1, totalPage: 0 }
         }
@@ -130,13 +136,13 @@ export const getAllProduct = async (reqQuery) => {
     const totalProduct = await Product.countDocuments(query);
     const products = await query.skip((pageNumber - 1) * pageSize).limit(pageSize).exec();
 
-    const totalPages = Math.ceil(totalProduct/pageSize);
+    const totalPages = Math.ceil(totalProduct / pageSize);
 
-    return {content: products, currentPage: pageNumber, totalPages}
+    return { content: products, currentPage: pageNumber, totalPages }
 }
 
 export const createMultipleProduct = async (products) => {
-    for(let product of products){
+    for (let product of products) {
         await createProduct(product);
     }
 }
