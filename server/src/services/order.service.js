@@ -1,42 +1,42 @@
 import { Address } from "../models/address.models.js"
 import { Order } from "../models/order.models.js"
 import { findUserCart } from "./cart.service.js"
+import { OrderItem } from "../models/orderItem.models.js"
 
-
-export const createOrder = async (user, shippAddress) => {
+export const createOrder = async (user, shipAddress) => {
     let addr;
 
-    if (shippAddress._id) {
-        const exitAddress = await Address.findOne(shippAddress._id);
+    if (shipAddress._id) {
+        const exitAddress = await Address.findOne(shipAddress._id);
         await addr === exitAddress;
     } else {
-        await addr === new Address(shippAddress);
-        await addr.user === user;
-
-        user.address === addr;
-        await user.save()
+        addr = new Address(shipAddress);
+        addr.user = user;
+        // user.address.push(addr);
+        // await user.save()
+        await addr.save()
     }
 
     const cart = await findUserCart(user._id);
-    const orderItems = [];
+    const OrderItems = [];
 
     for (const item of cart.cartItem) {
-        const orderItem = new orderItems({
+        const orderItemCreate = new OrderItem({
             price: item.price,
             product: item.product,
             quantity: item.quantity,
             size: item.size,
-            userId: item.userId,
+            user_id: item.user,
             discountedPrice: item.discountedPrice,
         })
 
-        const createdOrderItem = await orderItem.save();
-        await orderItems.push(createdOrderItem);
+        const createdOrderItem = await orderItemCreate.save();
+        await OrderItems.push(createdOrderItem);
     }
 
     const createdOrder = new Order({
         user,
-        orderItem,
+        orderItem: OrderItems,
         totalPrice: cart.totalPrice,
         totalDiscountedPrice: cart.totalDiscountedPrice,
         discount: cart.discount,
@@ -44,9 +44,10 @@ export const createOrder = async (user, shippAddress) => {
         shippingAddress: addr,
     })
 
-    const savedOrder = await createOrder.save();
+    const savedOrder = await createdOrder.save();
     return savedOrder;
 }
+
 
 export const findOrderById = async (orderId) => {
     const order = await Order.findById(orderId)
@@ -111,8 +112,8 @@ export const getAllOrder = async () => {
 }
 
 export const deleteOrder = async (orderId) => {
-   const order = await findOrderById(orderId);
-   await Order.findByIdAndDelete(order._id)
+    const order = await findOrderById(orderId);
+    await Order.findByIdAndDelete(order._id)
 }
 
 
