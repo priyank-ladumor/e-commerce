@@ -4,7 +4,7 @@ import { findProductByIdController, getAllProductController } from "../controlle
 const productRouter = express.Router()
 
 productRouter
-    .get("/", authenticate, getAllProductController)
-    .get("/id/:id", authenticate, findProductByIdController)
+    .get("/", getAllProductController)
+    .get("/id/:id", findProductByIdController)
 
 export { productRouter };

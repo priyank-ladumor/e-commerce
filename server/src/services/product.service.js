@@ -93,8 +93,8 @@ export const getAllProduct = async (reqQuery) => {
     if (category) {
         const exitCategory = await Categories.findOne({ name: category });
         if (exitCategory) {
-            // query = query.where('category', exitCategory._id)
             query = query.where('category', exitCategory._id)
+            // query = query.where("category").equals(exitCategory._id)
         } else {
             return { content: [], currentPage: 1, totalPage: 0 }
         }
@@ -106,6 +106,8 @@ export const getAllProduct = async (reqQuery) => {
     }
     if (sizes) {
         query = query.where("sizes.name").equals(sizes);
+        // query = query.where("sizes.name").in(sizes); 
+        //in only used in array
     }
 
     if (minPrice) {
@@ -144,6 +146,9 @@ export const createMultipleProduct = async (products) => {
         await createProduct(product);
     }
 }
+
+
+
 
 
 

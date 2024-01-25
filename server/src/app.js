@@ -20,7 +20,7 @@ app.use(cors({
     credentials: true
 }))
 app.use(express.json({ limit: "5mb" }))
-app.use(express.urlencoded({ limit: "5mb", extended: true }))
+app.use(express.urlencoded({ limit: "10mb", extended: false }))
 app.use(express.static(".././public"))
 app.use(morgan('default'))
 app.use(cookieParser())
@@ -35,5 +35,19 @@ app.use('/products', productRouter)
 app.use('/review', reviewRouter)
 app.use('/rating', ratingRouter)
 
+//cloudinary upload
+import { uploadOnCloudinary } from "./multer/cloudinary.js";
+import { Multer } from "./models/multer.js";
+import { upload } from "./multer/multer.js";
+
+const uploadImgs = async (req, res) => {
+    const cloud = await uploadOnCloudinary(req.files);
+    const img = new Multer();
+    img.imgs = cloud
+    await img.save()
+    res.send(img)
+}
+app.post("/multer", upload.array('imgs'), uploadImgs)
+//cloudinary upload
 
 export { app }
