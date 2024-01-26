@@ -1,5 +1,6 @@
 import express from "express"
-import { createUser, getUserProfile, loginUser, userEmailVerifiedByToken, getAllUserProfile } from "../controllers/user.controllers.js"
+import { authenticate } from "../middlewares/authenticate.js";
+import { createUser, getUserProfile, loginUser, userEmailVerifiedByToken, getAllUserProfile, getUserRole } from "../controllers/user.controllers.js"
 const userRouter = express.Router()
 
 userRouter
@@ -7,6 +8,7 @@ userRouter
     .post("/signin", loginUser)
     .post("/:token", userEmailVerifiedByToken)
     .get("/", getUserProfile)
+    .get("/role", authenticate, getUserRole)
     .get("/all", getAllUserProfile)
 
 export { userRouter };

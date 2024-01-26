@@ -23,7 +23,7 @@ const createUser = async (req, res) => {
         if (isUserExit) {
             return res.status(400).send({ msg: "user email address is already used" });
         } else {
-            const user = await new User(items);
+            const user = new User(items);
             const pass = await bcrypt.hash(password, 10);
             user.password = pass;
             const token = generateToken(user._id);
@@ -64,7 +64,7 @@ const loginUser = async (req, res) => {
                 const isPassValid = await bcrypt.compare(password, user.password)
                 if (isPassValid) {
                     const token = generateToken(user._id)
-                    return res.status(200).send({ msg: "user login successfully", token })
+                    return res.status(200).send({ msg: "user login successfully", token, role: user.role })
                 } else {
                     return res.status(401).send({ msg: "user password doesn't match" })
                 }
@@ -120,4 +120,17 @@ const getAllUserProfile = async (req, res) => {
     }
 }
 
-export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, getAllUserProfile }
+const getUserRole = async (req, res) => {
+    const token = req.headers.authorization;
+    const user = await findUserByToken(token)
+    try {
+        if (!user || !token) {
+            throw new Error("Invalid Token")
+        }
+        res.json({ role: user.role });
+    } catch (error) {
+        return res.status(500).send({ msg: error.message })
+    }
+}
+
+export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, getAllUserProfile, getUserRole }
