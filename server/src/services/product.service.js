@@ -1,73 +1,86 @@
-// import { set } from "mongoose";
 import { Categories } from "../models/category.model.js"
 import { Product } from "../models/product.models.js";
+import { uploadOnCloudinary } from "../multer/cloudinary.js";
 
 
-export const createProduct = async (reqData) => {
+export const createProduct = async (reqData, reqFiles) => {
+    if (reqData && reqFiles) {
+        let topLevel = await Categories.find({ name: reqData.topLevelCategory });
+        if (!topLevel || !(topLevel.length > 0)) {
+            const topLevel = new Categories({
+                name: reqData.topLevelCategory,
+                level: 1
+            })
+            await topLevel.save();
+        }
 
-    let topLevel = await Categories.find({ name: reqData.topLevelCategory });
-    if (!topLevel || !(topLevel.length > 0)) {
-        const topLevel = await new Categories({
-            name: reqData.topLevelCategory,
-            level: 1
+        let secondLevel = await Categories.findOne({
+            name: reqData.secondLevelCategory,
+            parentCategory: topLevel[0]?._id
         })
-        await topLevel.save();
-    }
-
-    let secondLevel = await Categories.findOne({
-        name: reqData.secondLevelCategory,
-        parentCategory: topLevel[0]?._id
-    })
-    if (!secondLevel) {
-        const parentCategory = await Categories.findOne({ name: reqData.topLevelCategory })
-        if (parentCategory) {
-            const secondLevel = await new Categories({
-                name: reqData.secondLevelCategory,
-                parentCategory: parentCategory._id,
-                level: 2
-            })
-            await secondLevel.save();
+        if (!secondLevel) {
+            const parentCategory = await Categories.findOne({ name: reqData.topLevelCategory })
+            if (parentCategory) {
+                const secondLevel = new Categories({
+                    name: reqData.secondLevelCategory,
+                    parentCategory: parentCategory._id,
+                    level: 2
+                })
+                await secondLevel.save();
+            }
         }
-    }
 
-
-    let thirdLevel = await Categories.findOne({
-        name: reqData.thirdLevelCategory,
-        parentCategory: secondLevel?._id,
-    })
-
-    if (!thirdLevel) {
-        const parentCategory2 = await Categories.findOne({ name: reqData.secondLevelCategory })
-        if (parentCategory2) {
-            const thirdLevel = await new Categories({
-                name: reqData.thirdLevelCategory,
-                parentCategory: parentCategory2._id,
-                level: 3
-            })
-            await thirdLevel.save();
+        let thirdLevel = await Categories.findOne({
+            name: reqData.thirdLevelCategory,
+            parentCategory: secondLevel?._id,
+        })
+        if (!thirdLevel) {
+            const parentCategory2 = await Categories.findOne({ name: reqData.secondLevelCategory })
+            if (parentCategory2) {
+                const thirdLevel = new Categories({
+                    name: reqData.thirdLevelCategory,
+                    parentCategory: parentCategory2._id,
+                    level: 3
+                })
+                await thirdLevel.save();
+            }
         }
+    } else {
+        return new Error("request data not received")
     }
+
+    const quantity = (reqData.sizes).map((ele) => Number(ele.quantity));
+    let totalQuantity = 0;
+
+    for (let i = 0; i < quantity.length; i++) {
+        totalQuantity += quantity[i];
+    }
+
+    const discountPriceByDiscountedPercentage = Math.round(reqData.price * (1 - reqData.discountPercentage / 100))
+
+    const thumbnail = await uploadOnCloudinary(reqFiles.thumbnail);
+    const productImages = await uploadOnCloudinary(reqFiles.images);
 
     const parentCategory3 = await Categories.findOne({ name: reqData.thirdLevelCategory })
     const product = new Product({
         title: reqData.title,
         color: reqData.color,
         description: reqData.description,
-        discountPrice: reqData.discountPrice,
+        discountPrice: discountPriceByDiscountedPercentage,
         discountPercentage: reqData.discountPercentage,
-        thumbnail: reqData.thumbnail,
-        images: reqData.images,
+        thumbnail: thumbnail,
+        images: productImages,
         brand: reqData.brand,
         price: reqData.price,
         sizes: reqData.sizes,
-        quantity: reqData.quantity,
+        quantity: totalQuantity,
         category: parentCategory3._id,
     })
     return await product.save();
 }
 
 export const deleteProduct = async (productId) => {
-    const product = await findProductById(productId);
+    // const product = await findProductById(productId);
     await Product.findByIdAndDelete(productId)
     return "product deleted successfully"
 }

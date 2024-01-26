@@ -8,7 +8,7 @@ cloudinary.config({
 });
 
 export const uploadOnCloudinary = async (localFilePath) => {
-    const path = localFilePath.map((ele) => `${process.env.IMG_PATH}${ele.originalname}`);
+    const path = await localFilePath.map((ele) => `${process.env.IMG_PATH}${ele.originalname}`);
     try {
         if (!localFilePath) return null
         let imgUrls = []

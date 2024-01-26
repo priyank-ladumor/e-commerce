@@ -2,7 +2,7 @@ import { createMultipleProduct, createProduct, deleteProduct, findProductById, g
 
 export const createProductController = async (req, res) => {
     try {
-        const createProd = await createProduct(req.body)
+        const createProd = await createProduct(req.body, req.files)
         return res.status(201).send(createProd);
     } catch (error) {
         return res.status(500).send({ msg: error.message });
