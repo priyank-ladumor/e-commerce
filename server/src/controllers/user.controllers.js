@@ -97,11 +97,11 @@ const userEmailVerifiedByToken = async (req, res) => {
 
 
 const getUserProfile = async (req, res) => {
+    // res.setHeader('Content-Type', 'application/json');
     const token = req.headers.authorization;
     try {
         if (token) {
             const user = await findUserByToken(token)
-            res.send(user)
             return res.status(200).send(user)
         } else {
             return res.status(401).send({})

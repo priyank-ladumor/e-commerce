@@ -8,11 +8,11 @@ const productSchema = new Schema({
     discountPrice: { type: Number },
     quantity: { type: Number, required: true },
     brand: { type: String },
-    color: { type: String },
-    sizes: [
+    sizesAndColor: [
         {
-            name: String,
-            quantity: Number
+            size: String,
+            quantity: Number,
+            color: String
         }
     ],
     images: [String],

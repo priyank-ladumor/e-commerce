@@ -4,7 +4,8 @@ import { uploadOnCloudinary } from "../multer/cloudinary.js";
 
 
 export const createProduct = async (reqData, reqFiles) => {
-    if (reqData && reqFiles) {
+    if (reqData) {
+    // if (reqData && reqFiles) {
         let topLevel = await Categories.find({ name: reqData.topLevelCategory });
         if (!topLevel || !(topLevel.length > 0)) {
             const topLevel = new Categories({
@@ -49,7 +50,7 @@ export const createProduct = async (reqData, reqFiles) => {
         return new Error("request data not received")
     }
 
-    const quantity = (reqData.sizes).map((ele) => Number(ele.quantity));
+    const quantity = (reqData.sizesAndColor).map((ele) => Number(ele.quantity));
     let totalQuantity = 0;
 
     for (let i = 0; i < quantity.length; i++) {
@@ -58,8 +59,10 @@ export const createProduct = async (reqData, reqFiles) => {
 
     const discountPriceByDiscountedPercentage = Math.round(reqData.price * (1 - reqData.discountPercentage / 100))
 
-    const thumbnail = await uploadOnCloudinary(reqFiles.thumbnail);
-    const productImages = await uploadOnCloudinary(reqFiles.images);
+    const thumbnail = await uploadOnCloudinary(reqData.thumbnail);
+    const productImages = await uploadOnCloudinary(reqData.images);
+    // const thumbnail = await uploadOnCloudinary(reqFiles.thumbnail);
+    // const productImages = await uploadOnCloudinary(reqFiles.images);
 
     const parentCategory3 = await Categories.findOne({ name: reqData.thirdLevelCategory })
     const product = new Product({
@@ -72,7 +75,7 @@ export const createProduct = async (reqData, reqFiles) => {
         images: productImages,
         brand: reqData.brand,
         price: reqData.price,
-        sizes: reqData.sizes,
+        sizesAndColor: reqData.sizesAndColor,
         quantity: totalQuantity,
         category: parentCategory3._id,
     })
