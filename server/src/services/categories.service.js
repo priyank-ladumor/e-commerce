@@ -43,3 +43,21 @@ export const getThirdLevelCategory = async (reqData) => {
         throw new Error("no available third level category")
     }
 }
+
+export const delteCategoryById = async (CategoryID) => {
+    if (CategoryID) {
+        const category = Categories.findByIdAndDelete(CategoryID)
+        return category
+    } else {
+        throw new Error("CategoryID not available")
+    }
+}
+
+export const EditCategoryById = async (req) => {
+    if (req.params.id) {
+        const category = Categories.findByIdAndUpdate({ _id: req.params.id }, { name: req.body.category }, { new: true })
+        return category
+    } else {
+        throw new Error("CategoryID not available")
+    }
+}
