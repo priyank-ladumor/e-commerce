@@ -16,11 +16,16 @@ export const getTopLevelCategory = async (reqData) => {
 }
 
 export const getSecondLevelCategory = async (reqData) => {
-    const level2 = Categories.find({ level: 2 })
+    let level2 = Categories.find({ level: 2 }).populate({ path: "parentCategory", model: Categories });
     if (level2) {
-        const { pageNumber, pageSize } = reqData.query;
+        let { pageNumber, pageSize, parentCategory } = reqData.query;
+
+        if(parentCategory){
+            level2 = level2.where('parentCategory', parentCategory)
+        }
+
         const totalLv2 = await Categories.countDocuments(level2);
-        const AllLv2 = await level2.skip((pageNumber - 1) * pageSize).limit(pageSize);
+        let AllLv2 = await level2.skip((pageNumber - 1) * pageSize).limit(pageSize);
         const totalPages = Math.ceil(totalLv2 / pageSize);
 
         return { content: AllLv2, currentPage: pageNumber, totalPages: totalPages }
