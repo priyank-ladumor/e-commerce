@@ -1,12 +1,13 @@
 
 import express from "express"
-import { getTopLevelCategoryController, getThirdLevelCategoryController, getSecondLevelCategoryController, delteCategoryByIdController, EditCategoryByIdController, createTopLvlCategoryController, createSecondLvlCategoryController, createThirdLvlCategoryController } from "../controllers/categories.controllers.js";
+import { getTopLevelCategoryController, getThirdLevelCategoryController, getSecondLevelCategoryController, delteCategoryByIdController, EditCategoryByIdController, createTopLvlCategoryController, createSecondLvlCategoryController, createThirdLvlCategoryController, getSearchCategoryController } from "../controllers/categories.controllers.js";
 const categoriesRouter = express.Router()
 
 categoriesRouter
     .get("/toplevel", getTopLevelCategoryController)
     .get("/secondlevel", getSecondLevelCategoryController)
-    .get("/thirdlevel", getThirdLevelCategoryController)
+    .post("/thirdlevel", getThirdLevelCategoryController)
+    .post("/search", getSearchCategoryController)
     .delete("/:id", delteCategoryByIdController)
     .patch("/:id", EditCategoryByIdController)
     .post("/toplevel/create", createTopLvlCategoryController)

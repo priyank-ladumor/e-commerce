@@ -35,10 +35,15 @@ export const getSecondLevelCategory = async (reqData) => {
     }
 }
 
-export const getThirdLevelCategory = async (reqData) => {
-    const level3 = Categories.find({ level: 3 })
+export const getThirdLevelCategory = async (req) => {
+    let level3 = Categories.find({ level: 3 }).populate({ path: "parentCategory", model: Categories });
     if (level3) {
-        const { pageNumber, pageSize } = reqData.query;
+        const { pageNumber, pageSize, parentCategory } = req.body;
+
+        if (parentCategory) {
+            level3 = level3.where('parentCategory', parentCategory)
+        }
+
         const totalLv3 = await Categories.countDocuments(level3);
         const AllLv3 = await level3.skip((pageNumber - 1) * pageSize).limit(pageSize);
         const totalPages = Math.ceil(totalLv3 / pageSize);
@@ -46,6 +51,23 @@ export const getThirdLevelCategory = async (reqData) => {
         return { content: AllLv3, currentPage: pageNumber, totalPages: totalPages }
     } else {
         throw new Error("no available third level category")
+    }
+}
+
+export const getSearchCategory = async (req) => {
+    if (req.body.search) {
+        const { pageNumber, pageSize } = req.body;
+
+        // let query = (await Categories.find()).filter(item => item.name.includes(req.body.search))
+        let query = Categories.find({ name: { $regex: '.*' + req.body.search + '.*' } })
+
+        const totalQuantity = await Categories.countDocuments(query);
+        const finalQuery = await query.skip((pageNumber - 1) * pageSize).limit(pageSize);
+        const totalPages = Math.ceil(totalQuantity / pageSize);
+
+        return { content: finalQuery, currentPage: pageNumber, totalPages: totalPages }
+    } else {
+        throw new Error("did not get search data")
     }
 }
 

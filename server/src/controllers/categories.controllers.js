@@ -1,4 +1,4 @@
-import { getTopLevelCategory, getThirdLevelCategory, getSecondLevelCategory, delteCategoryById, EditCategoryById, createTopLvlCategory, createSecondLvlCategory, createThirdLvlCategory } from "../services/categories.service.js";
+import { getTopLevelCategory, getThirdLevelCategory, getSecondLevelCategory, delteCategoryById, EditCategoryById, createTopLvlCategory, createSecondLvlCategory, createThirdLvlCategory, getSearchCategory } from "../services/categories.service.js";
 
 export const getTopLevelCategoryController = async (req, res) => {
     try {
@@ -22,6 +22,15 @@ export const getThirdLevelCategoryController = async (req, res) => {
     try {
         const thirdLevel = await getThirdLevelCategory(req);
         return res.status(200).send(thirdLevel);
+    } catch (error) {
+        return res.status(500).send({ error: error.message })
+    }
+}
+
+export const getSearchCategoryController = async (req, res) => {
+    try {
+        const search = await getSearchCategory(req);
+        return res.status(200).send(search);
     } catch (error) {
         return res.status(500).send({ error: error.message })
     }
