@@ -20,7 +20,7 @@ export const getSecondLevelCategory = async (reqData) => {
     if (level2) {
         let { pageNumber, pageSize, parentCategory } = reqData.query;
 
-        if(parentCategory){
+        if (parentCategory) {
             level2 = level2.where('parentCategory', parentCategory)
         }
 
@@ -64,5 +64,62 @@ export const EditCategoryById = async (req) => {
         return category
     } else {
         throw new Error("CategoryID not available")
+    }
+}
+
+
+export const createTopLvlCategory = async (req) => {
+    if (req.body.topCategory) {
+        const isTopExit = await Categories.findOne({ name: req.body.topCategory });
+
+        if (isTopExit) {
+            throw new Error(`${req.body.topCategory} is exits category`)
+        } else {
+            const category = new Categories({ name: req.body.topCategory, level: 1 });
+            category.save();
+            return category
+        }
+    } else {
+        throw new Error("did not get top category")
+    }
+}
+
+export const createSecondLvlCategory = async (req) => {
+    if (req.body.topCategory && req.body.secondCategory) {
+        const parentCategory = await Categories.findOne({ name: req.body.topCategory });
+        const isSecondExit = await Categories.findOne({ name: req.body.secondCategory });
+        if (!parentCategory) {
+            throw new Error(`${req.body.topCategory} is not a valid Category`)
+        } else {
+            if (isSecondExit) {
+                throw new Error(`${req.body.secondCategory} is exits category`)
+            } else {
+                const category = new Categories({ name: req.body.secondCategory, level: 2, parentCategory: parentCategory._id });
+                category.save();
+                return category
+            }
+        }
+    } else {
+        throw new Error("did not get top and second category")
+    }
+}
+
+export const createThirdLvlCategory = async (req) => {
+    if (req.body.thirdCategory && req.body.secondCategory) {
+        const parentCategory = await Categories.findOne({ name: req.body.secondCategory });
+        const isSecondExit = await Categories.findOne({ name: req.body.thirdCategory });
+        if (!parentCategory) {
+            throw new Error(`${req.body.secondCategory} is not a valid Category`)
+        } else {
+            if (isSecondExit) {
+                throw new Error(`${req.body.thirdCategory} is exits category`)
+            } else {
+                const category = new Categories({ name: req.body.thirdCategory, level: 3, parentCategory: parentCategory._id });
+                category.save();
+                return category
+            }
+        }
+    } else {
+        throw new Error("did not get second and third category")
     }
 }

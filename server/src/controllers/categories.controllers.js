@@ -1,4 +1,4 @@
-import { getTopLevelCategory, getThirdLevelCategory, getSecondLevelCategory, delteCategoryById, EditCategoryById } from "../services/categories.service.js";
+import { getTopLevelCategory, getThirdLevelCategory, getSecondLevelCategory, delteCategoryById, EditCategoryById, createTopLvlCategory, createSecondLvlCategory, createThirdLvlCategory } from "../services/categories.service.js";
 
 export const getTopLevelCategoryController = async (req, res) => {
     try {
@@ -44,6 +44,33 @@ export const EditCategoryByIdController = async (req, res) => {
             return res.status(400).send({ msg: "category updated failed" });
         }
         return res.status(200).send({ msg: "category updated successfully" });
+    } catch (error) {
+        return res.status(500).send({ error: error.message })
+    }
+}
+
+export const createTopLvlCategoryController = async (req, res) => {
+    try {
+        await createTopLvlCategory(req);
+        return res.status(200).send({ msg: `${req.body.topCategory} category created successfully` });
+    } catch (error) {
+        return res.status(500).send({ error: error.message })
+    }
+}
+
+export const createSecondLvlCategoryController = async (req, res) => {
+    try {
+        await createSecondLvlCategory(req);
+        return res.status(200).send({ msg: `${req.body.secondCategory} category created successfully` });
+    } catch (error) {
+        return res.status(500).send({ error: error.message })
+    }
+}
+
+export const createThirdLvlCategoryController = async (req, res) => {
+    try {
+        await createThirdLvlCategory(req);
+        return res.status(200).send({ msg: `${req.body.thirdCategory} category created successfully` });
     } catch (error) {
         return res.status(500).send({ error: error.message })
     }
