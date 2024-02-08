@@ -13,7 +13,7 @@ const userSchema = new Schema({
     rating: [{ type: mongoose.Schema.Types.ObjectId, ref: "Rating" }],
     review: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
     role: { type: String, required: true, default: "CUSTOMER" },
-    // createdAt: { type: Date, default: Date.now() },
+    status: { type: String, default: "Active" }
 }, { timestamps: true });
 
 

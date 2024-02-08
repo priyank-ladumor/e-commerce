@@ -111,10 +111,14 @@ const getUserProfile = async (req, res) => {
     }
 }
 
-const getAllUserProfile = async (req, res) => {
+export const getAllUserProfiles = async (req, res) => {
+    const { pageNumber, pageSize } = req.query;
     try {
-        const items = await User.find()
-        res.send(items)
+        let items = await User.find().skip((pageNumber - 1) * pageSize).limit(pageSize);
+        const totalUserCount = await User.countDocuments(items);
+        const totalPages = Math.ceil(totalUserCount / pageSize);
+        const payload = { content: items, currentPage: pageNumber, totalPages: totalPages }
+        return res.status(200).send(payload)
     } catch (error) {
         return res.status(500).send({ msg: error.message })
     }
@@ -133,4 +137,4 @@ const getUserRole = async (req, res) => {
     }
 }
 
-export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, getAllUserProfile, getUserRole }
+export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, getUserRole }
