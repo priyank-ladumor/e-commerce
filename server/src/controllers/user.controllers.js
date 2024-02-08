@@ -1,7 +1,7 @@
 import { User } from "../models/user.models.js";
 import bcrypt from "bcrypt"
 import { getUserIdFromToken, generateToken } from "../middlewares/jwtProvider.js"
-import { findUserByEmail, findUserById, findUserByToken } from "../services/user.service.js";
+import { findUserByEmail, findUserById, findUserByToken, userDeleteById } from "../services/user.service.js";
 import * as fs from 'fs';
 import handlebars from "handlebars"
 import { sendEmail } from "../services/email.service.js";
@@ -112,29 +112,96 @@ const getUserProfile = async (req, res) => {
 }
 
 export const getAllUserProfiles = async (req, res) => {
-    const { pageNumber, pageSize } = req.query;
+    const { pageNumber, pageSize, search } = req.query;
+    // try {
+    //     let items = await User.find().skip((pageNumber - 1) * pageSize).limit(pageSize);
+    //     const totalUserCount = await User.countDocuments(items);
+    //     const totalPages = Math.ceil(totalUserCount / pageSize);
+    //     const payload = { content: items, currentPage: pageNumber, totalPages: totalPages }
+    //     return res.status(200).send(payload)
+    // } catch (error) {
+    //     return res.status(500).send({ msg: error.message })
+    // }
     try {
-        let items = await User.find().skip((pageNumber - 1) * pageSize).limit(pageSize);
+
+        let items = search ? User.find({ email: { $regex: '.*' + search + '.*' } }) : User.find()
+
         const totalUserCount = await User.countDocuments(items);
+        const users = await items.skip((pageNumber - 1) * pageSize).limit(pageSize);
         const totalPages = Math.ceil(totalUserCount / pageSize);
-        const payload = { content: items, currentPage: pageNumber, totalPages: totalPages }
+        const payload = { content: users, currentPage: pageNumber, totalPages: totalPages }
         return res.status(200).send(payload)
     } catch (error) {
         return res.status(500).send({ msg: error.message })
     }
 }
 
-const getUserRole = async (req, res) => {
-    const token = req.headers.authorization;
-    const user = await findUserByToken(token)
+const userDeleteByIdController = async (req, res) => {
+    const { id } = req.params;
     try {
-        if (!user || !token) {
-            throw new Error("Invalid Token")
+        const user = await findUserById(id)
+        const deleteUser = await userDeleteById(id)
+        if (deleteUser.deletedCount === 1) {
+            res.status(200).send({ msg: `${user.firstName} deleted successfully` });
         }
-        res.json({ role: user.role });
+        if (!user) return res.status(404).send({ msg: 'No such user exits' })
     } catch (error) {
         return res.status(500).send({ msg: error.message })
     }
 }
 
-export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, getUserRole }
+const userBannedByIdController = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await findUserById(id)
+        if (user.status === "Banned") return res.status(404).send({ msg: `${user.firstName} banned already.` })
+        if (user.status = "Active") {
+            user.status = "Banned"
+            user.save();
+            res.status(200).send({ msg: `${user.firstName} banned successfully` });
+        }
+        if (!user) return res.status(404).send({ msg: 'No such user exits' })
+    } catch (error) {
+        return res.status(500).send({ msg: error.message })
+    }
+}
+
+const userActiveByIdController = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await findUserById(id)
+        if (user.status === "Active") return res.status(404).send({ msg: `${user.firstName} active already.` })
+        if (user.status === "Banned") {
+            user.status = "Active"
+            user.save();
+            res.status(200).send({ msg: `${user.firstName} active successfully` });
+        }
+        if (!user) return res.status(404).send({ msg: 'No such user exits' })
+    } catch (error) {
+        return res.status(500).send({ msg: error.message })
+    }
+}
+
+// const getSearchUsersController = async (req, res) => {
+// console.log(req);
+// const { pageNumber, pageSize, search } = req.body;
+// if (search && pageNumber && pageSize) {
+// let query = User.find({ email: { $regex: '.*' + search + '.*' } })
+// const totalQuantity = await User.countDocuments(query);
+// const finalQuery = await query.skip((pageNumber - 1) * pageSize).limit(pageSize);
+// const totalPages = Math.ceil(totalQuantity / pageSize);
+
+// return { content: finalQuery, currentPage: pageNumber, totalPages: totalPages }
+// } else {
+//     throw new Error("did not get search data")
+// }
+// try {
+// const searchQuery =  (await User.find()).filter(item => item.email.includes(req.query.search))
+// } catch (error) {
+// return res.status(500).send({ msg: error.message })
+// }
+// }
+
+
+
+export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, userDeleteByIdController, userBannedByIdController, userActiveByIdController }

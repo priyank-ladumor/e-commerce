@@ -27,6 +27,15 @@ const findUserById = async (id) => {
     }
 }
 
+const userDeleteById = async (id) => {
+    if (id) {
+        const result = await User.deleteOne({ _id: id })
+        return result;
+    } else {
+        throw new Error({ msg: "id not found" })
+    }
+}
+
 const findUserByToken = async (token) => {
     try {
         if (token) {
@@ -40,4 +49,6 @@ const findUserByToken = async (token) => {
         throw new Error(error.message)
     }
 }
-export { findUserById, findUserByEmail, findUserByToken }
+
+
+export { findUserById, findUserByEmail, findUserByToken, userDeleteById }
