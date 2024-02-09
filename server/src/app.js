@@ -12,6 +12,7 @@ import { productRouter } from "./routes/product.routes.js";
 import { reviewRouter } from "./routes/review.routes.js";
 import { ratingRouter } from "./routes/rating.routes.js";
 import { categoriesRouter } from "./routes/categories.routes.js";
+import { sizeRouter } from "./routes/size.routes.js";
 
 const app = express()
 
@@ -35,6 +36,7 @@ app.use('/products', productRouter)
 app.use('/review', reviewRouter)
 app.use('/rating', ratingRouter)
 app.use('/categories', categoriesRouter)
+app.use('/size', sizeRouter)
 
 //cloudinary upload
 import { uploadOnCloudinary } from "./multer/cloudinary.js";

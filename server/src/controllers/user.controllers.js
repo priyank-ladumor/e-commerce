@@ -61,12 +61,16 @@ const loginUser = async (req, res) => {
         const user = await findUserByEmail(email)
         if (user) {
             if (user.isEmailVerified === true) {
-                const isPassValid = await bcrypt.compare(password, user.password)
-                if (isPassValid) {
-                    const token = generateToken(user._id)
-                    return res.status(200).send({ msg: "user login successfully", token, role: user.role })
+                if (user.status === "Active") {
+                    const isPassValid = await bcrypt.compare(password, user.password)
+                    if (isPassValid) {
+                        const token = generateToken(user._id)
+                        return res.status(200).send({ msg: "user login successfully", token, role: user.role })
+                    } else {
+                        return res.status(401).send({ msg: "user password doesn't match" })
+                    }
                 } else {
-                    return res.status(401).send({ msg: "user password doesn't match" })
+                    return res.status(403).send({ msg: `Your account has been deactivated by admin` })
                 }
             } else {
                 return res.status(403).send({ msg: "Please verify your account first" })
@@ -113,15 +117,6 @@ const getUserProfile = async (req, res) => {
 
 export const getAllUserProfiles = async (req, res) => {
     const { pageNumber, pageSize, search } = req.query;
-    // try {
-    //     let items = await User.find().skip((pageNumber - 1) * pageSize).limit(pageSize);
-    //     const totalUserCount = await User.countDocuments(items);
-    //     const totalPages = Math.ceil(totalUserCount / pageSize);
-    //     const payload = { content: items, currentPage: pageNumber, totalPages: totalPages }
-    //     return res.status(200).send(payload)
-    // } catch (error) {
-    //     return res.status(500).send({ msg: error.message })
-    // }
     try {
 
         let items = search ? User.find({ email: { $regex: '.*' + search + '.*' } }) : User.find()
