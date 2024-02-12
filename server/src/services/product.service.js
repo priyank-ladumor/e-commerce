@@ -78,7 +78,8 @@ export const createProduct = async (reqData, reqFiles) => {
         sizesAndColor: reqData.sizesAndColor,
         quantity: totalQuantity,
         category: parentCategory3._id,
-        fabric: reqData.fabric
+        fabric: reqData.fabric,
+        material: reqData.material
     })
     return await product.save();
 }
@@ -103,7 +104,7 @@ export const findProductById = async (id) => {
 
 export const getAllProduct = async (reqQuery) => {
     let { category, color, sizes, minPrice, maxPrice, stock, minDiscount, sort, pageNumber, pageSize } = reqQuery;
-    pageSize = pageSize || 12;
+    pageSize = pageSize || 120;
 
     let query = Product.find().populate({ path: "category", model: Categories });
 

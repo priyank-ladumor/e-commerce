@@ -9,6 +9,7 @@ const productSchema = new Schema({
     quantity: { type: Number, required: true },
     brand: { type: String },
     fabric: { type: String },
+    material: { type: String },
     sizesAndColor: [
         {
             size: String,
