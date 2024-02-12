@@ -8,6 +8,7 @@ const productSchema = new Schema({
     discountPrice: { type: Number },
     quantity: { type: Number, required: true },
     brand: { type: String },
+    fabric: { type: String },
     sizesAndColor: [
         {
             size: String,

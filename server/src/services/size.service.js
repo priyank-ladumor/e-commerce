@@ -60,6 +60,28 @@ export const deleteSizeOption = async (label, option) => {
     }
 }
 
+export const updateSizeOption = async (label, option, newOption) => {
+    if (option && label) {
+        const findLable = await Size.findOne({ label: label });
+        if (!(findLable === null)) {
+            const isOptionValid = findLable.options?.filter((item) => item === option)
+            console.log(isOptionValid, "isOptionValid");
+            if (isOptionValid[0] === option) {
+                let removeOpt = await Size.updateOne({ label: label }, { $pull: { options: option } }, { new: true });
+                findLable.options.push(newOption)
+                findLable.save();
+                return findLable
+            } else {
+                throw new Error("this option does not exits")
+            }
+        } else {
+            throw new Error("label not exits")
+        }
+    } else {
+        throw new Error("did not get label, option and newOption")
+    }
+}
+
 export const deleteLabelAndOption = async (label) => {
     if (label) {
         let removeLabelSizeData = await Size.deleteOne({ label: label });
@@ -73,8 +95,14 @@ export const deleteLabelAndOption = async (label) => {
 }
 
 export const getSize = async () => {
-    let sizes = await Size.find();
-    if(sizes.length > 0){
-        return sizes
+    let sizes = await Size.find()
+    if (sizes.length > 0) {
+        let sort = sizes.map((ele) => ele.options.slice().sort((a,b) => a-b));
+        if (sort.length > 0) {
+            for (let i = 0; i < sort.length; i++) {
+                sizes[i].options = sort[i]
+            }
+            return sizes
+        }
     }
 }

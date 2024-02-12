@@ -1,4 +1,4 @@
-import { createSizeLabel, createSizeOption, deleteLabelAndOption, deleteSizeOption, getSize } from "../services/size.service.js";
+import { createSizeLabel, createSizeOption, deleteLabelAndOption, deleteSizeOption, getSize, updateSizeOption } from "../services/size.service.js";
 
 export const createSizeLabelController = async (req, res) => {
     const { label } = req.body;
@@ -16,6 +16,7 @@ export const createSizeLabelController = async (req, res) => {
 
 export const createSizeOptionController = async (req, res) => {
     const { label, option } = req.body;
+    console.log(req.body);
     try {
         if (label && option) {
             await createSizeOption(label, option);
@@ -33,6 +34,17 @@ export const deleteSizeOptionController = async (req, res) => {
     try {
         await deleteSizeOption(label, option);
         res.status(201).send({ msg: `${option} deleted successfully` });
+
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const updateSizeOptionController = async (req, res) => {
+    const { label, option, newOption } = req.body;
+    try {
+        await updateSizeOption(label, option, newOption);
+        res.status(201).send({ msg: `${option} updated to ${newOption}` });
 
     } catch (error) {
         return res.status(500).send({ msg: error.message });

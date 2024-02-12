@@ -78,6 +78,7 @@ export const createProduct = async (reqData, reqFiles) => {
         sizesAndColor: reqData.sizesAndColor,
         quantity: totalQuantity,
         category: parentCategory3._id,
+        fabric: reqData.fabric
     })
     return await product.save();
 }
