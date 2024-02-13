@@ -103,20 +103,12 @@ export const findProductById = async (id) => {
 }
 
 export const getAllProduct = async (reqQuery) => {
-    let { thirdCategory, topCategory, secondCategory, color, sizes, minPrice, maxPrice, stock, minDiscount, sort, pageNumber, pageSize } = reqQuery;
+    let { thirdCategory, gender, category, color, sizes, minPrice, maxPrice, stock, minDiscount, sort, pageNumber, pageSize } = reqQuery;
     pageSize = pageSize || 12;
 
     let query = Product.find().populate({ path: "category", model: Categories, populate: { path: "parentCategory", model: Categories } });
 
     let catIds = [];
-
-    // if (topCategory) {
-    //     const exitCategory2 = await Categories.findOne({ name: topCategory });
-    //     // query = query.where('category.parentCategory.parentCategory', topCategory);
-    //     query =  (await query.where('category.parentCategory')).in(exitCategory2._id)
-    //     console.log(query);
-    // }
-
     if (thirdCategory) {
         for (let key of thirdCategory) {
             const exitCategory = await Categories.findOne({ name: key });
@@ -166,24 +158,35 @@ export const getAllProduct = async (reqQuery) => {
         query = query.sort({ price: sortDirection })
     }
 
-    if (secondCategory) {
-        const exitCategory = await Categories.findOne({ name: secondCategory });
+    if (category) {
+        const exitCategory = await Categories.findOne({ name: category });
         if (exitCategory) {
             query = (await query).filter((ele) => ele.category.parentCategory._id.toString() === exitCategory._id.toString())
         }
     }
 
-    if (topCategory) {
-        const exitCategory = await Categories.findOne({ name: topCategory });
+    if (gender) {
+        const exitCategory = await Categories.findOne({ name: gender });
         if (exitCategory) {
             query = (await query).filter((ele) => ele.category.parentCategory.parentCategory._id.toString() === exitCategory._id.toString())
         }
     }
 
-    const totalProduct = (await query).length
-    query = pageNumber === 1 ? query.slice(((pageNumber - 1) * pageSize), pageSize) : query.slice(((pageNumber - 1) * pageSize), ((pageNumber - 1) * pageSize) + Number(pageSize))
-    const totalPages = Math.ceil(totalProduct / pageSize);
-    return { content: query, currentPage: pageNumber, totalPages }
+
+    if (gender || category) {
+        const totalProduct = (await query).length
+        query = pageNumber === 1 ? query.slice(((pageNumber - 1) * pageSize), pageSize) : query.slice(((pageNumber - 1) * pageSize), ((pageNumber - 1) * pageSize) + Number(pageSize))
+        const totalPages = Math.ceil(totalProduct / pageSize);
+
+        return { content: query, currentPage: pageNumber, totalPages }
+    }else{
+        const totalQuantity = await Product.countDocuments(query);
+        const finalQuery = await query.skip((pageNumber - 1) * pageSize).limit(pageSize);
+        const totalPages = Math.ceil(totalQuantity / pageSize);
+
+        return { content: finalQuery, currentPage: pageNumber, totalPages: totalPages }
+    }
+
 }
 
 export const createMultipleProduct = async (products) => {
