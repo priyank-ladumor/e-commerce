@@ -5,7 +5,7 @@ import { uploadOnCloudinary } from "../multer/cloudinary.js";
 
 export const createProduct = async (reqData, reqFiles) => {
     if (reqData) {
-    // if (reqData && reqFiles) {
+        // if (reqData && reqFiles) {
         let topLevel = await Categories.find({ name: reqData.topLevelCategory });
         if (!topLevel || !(topLevel.length > 0)) {
             const topLevel = new Categories({
@@ -103,37 +103,51 @@ export const findProductById = async (id) => {
 }
 
 export const getAllProduct = async (reqQuery) => {
-    let { category, color, sizes, minPrice, maxPrice, stock, minDiscount, sort, pageNumber, pageSize } = reqQuery;
-    pageSize = pageSize || 120;
+    let { thirdCategory, topCategory, secondCategory, color, sizes, minPrice, maxPrice, stock, minDiscount, sort, pageNumber, pageSize } = reqQuery;
+    pageSize = pageSize || 12;
 
-    let query = Product.find().populate({ path: "category", model: Categories });
+    let query = Product.find().populate({ path: "category", model: Categories, populate: { path: "parentCategory", model: Categories } });
 
-    if (category) {
-        const exitCategory = await Categories.findOne({ name: category });
-        if (exitCategory) {
-            query = query.where('category', exitCategory._id)
-            // query = query.where("category").equals(exitCategory._id)
+    let catIds = [];
+
+    // if (topCategory) {
+    //     const exitCategory2 = await Categories.findOne({ name: topCategory });
+    //     // query = query.where('category.parentCategory.parentCategory', topCategory);
+    //     query =  (await query.where('category.parentCategory')).in(exitCategory2._id)
+    //     console.log(query);
+    // }
+
+    if (thirdCategory) {
+        for (let key of thirdCategory) {
+            const exitCategory = await Categories.findOne({ name: key });
+            if (exitCategory) {
+                catIds.push(exitCategory._id)
+            }
+        }
+        if (catIds) {
+            query = query.where('category').in(catIds)
         } else {
             return { content: [], currentPage: 1, totalPage: 0 }
         }
     }
+
 
     if (color) {
         let clr = color.trim().toLowerCase()
         query = query.where("color").equals(clr)
     }
     if (sizes) {
-        query = query.where("sizes.name").equals(sizes);
+        query = query.where("sizesAndColor.size").equals(sizes);
         // query = query.where("sizes.name").in(sizes); 
         //in only used in array
     }
 
     if (minPrice) {
-        query = query.where("price").gte(Number(minPrice));
+        query = query.where("discountPrice").gte(Number(minPrice));
     }
 
     if (maxPrice) {
-        query = query.where("price").lte(Number(maxPrice));
+        query = query.where("discountPrice").lte(Number(maxPrice));
     }
     if (minDiscount) {
         query = query.where("discountPercentage").gt(minDiscount);
@@ -152,11 +166,24 @@ export const getAllProduct = async (reqQuery) => {
         query = query.sort({ price: sortDirection })
     }
 
-    const totalProduct = await Product.countDocuments(query);
-    const products = await query.skip((pageNumber - 1) * pageSize).limit(pageSize);
-    const totalPages = Math.ceil(totalProduct / pageSize);
+    if (secondCategory) {
+        const exitCategory = await Categories.findOne({ name: secondCategory });
+        if (exitCategory) {
+            query = (await query).filter((ele) => ele.category.parentCategory._id.toString() === exitCategory._id.toString())
+        }
+    }
 
-    return { content: products, currentPage: pageNumber, totalPages }
+    if (topCategory) {
+        const exitCategory = await Categories.findOne({ name: topCategory });
+        if (exitCategory) {
+            query = (await query).filter((ele) => ele.category.parentCategory.parentCategory._id.toString() === exitCategory._id.toString())
+        }
+    }
+
+    const totalProduct = (await query).length
+    query = pageNumber === 1 ? query.slice(((pageNumber - 1) * pageSize), pageSize) : query.slice(((pageNumber - 1) * pageSize), ((pageNumber - 1) * pageSize) + Number(pageSize))
+    const totalPages = Math.ceil(totalProduct / pageSize);
+    return { content: query, currentPage: pageNumber, totalPages }
 }
 
 export const createMultipleProduct = async (products) => {
