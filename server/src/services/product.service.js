@@ -103,7 +103,7 @@ export const findProductById = async (id) => {
 }
 
 export const getAllProduct = async (reqQuery) => {
-    let { thirdCategory, gender, category, color, sizes, minPrice, maxPrice, stock, minDiscount, sort, pageNumber, pageSize } = reqQuery;
+    let { thirdCategory, gender, category, search, color, sizes, minPrice, maxPrice, available, minDiscount, sort, pageNumber, pageSize } = reqQuery;
     pageSize = pageSize || 12;
 
     let query = Product.find().populate({ path: "category", model: Categories, populate: { path: "parentCategory", model: Categories } });
@@ -126,8 +126,10 @@ export const getAllProduct = async (reqQuery) => {
 
     if (color) {
         let clr = color.trim().toLowerCase()
-        query = query.where("color").equals(clr)
+        console.log(clr);
+        query = query.where("sizesAndColor.color").in(clr)
     }
+
     if (sizes) {
         query = query.where("sizesAndColor.size").equals(sizes);
         // query = query.where("sizes.name").in(sizes); 
@@ -142,20 +144,27 @@ export const getAllProduct = async (reqQuery) => {
         query = query.where("discountPrice").lte(Number(maxPrice));
     }
     if (minDiscount) {
-        query = query.where("discountPercentage").gt(minDiscount);
+        query = query.where("discountPercentage").gte(minDiscount);
     }
-    if (stock) {
-        if (stock == "in_stock") {
+    if (available) {
+        if (available == "in_stock") {
             query = query.where("quantity").gte(1);
         }
-        else if (stock == "out_of_stock") {
+        else if (available == "out_of_stock") {
             query = query.where("quantity").lte(0);
         }
     }
 
     if (sort) {
-        const sortDirection = sort === "high_to_low" ? -1 : 1;
+        const sortDirection = sort === "high_to_low" ? -1 : sort === "low_to_high" && 1;
         query = query.sort({ price: sortDirection })
+    }
+
+    // if (search) {
+    //     query = query.where("title").equals(new RegExp(search))
+    // }
+    if (search) {
+        query = (await query).filter((ele) => ele.title.toLowerCase().includes(search.toLowerCase()))
     }
 
     if (category) {
@@ -172,14 +181,13 @@ export const getAllProduct = async (reqQuery) => {
         }
     }
 
-
-    if (gender || category) {
+    if (gender || category || search) {
         const totalProduct = (await query).length
         query = pageNumber === 1 ? query.slice(((pageNumber - 1) * pageSize), pageSize) : query.slice(((pageNumber - 1) * pageSize), ((pageNumber - 1) * pageSize) + Number(pageSize))
         const totalPages = Math.ceil(totalProduct / pageSize);
 
         return { content: query, currentPage: pageNumber, totalPages }
-    }else{
+    } else {
         const totalQuantity = await Product.countDocuments(query);
         const finalQuery = await query.skip((pageNumber - 1) * pageSize).limit(pageSize);
         const totalPages = Math.ceil(totalQuantity / pageSize);
