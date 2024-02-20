@@ -54,6 +54,16 @@ export const getThirdLevelCategory = async (req) => {
     }
 }
 
+export const getThirdLevelCategoryUseInFilter = async (req) => {
+    const { pageNumber, pageSize, parentCategory } = req.body;
+    if (parentCategory) {
+        let level3 = await Categories.find({ level: 3, parentCategory: parentCategory }).populate({ path: "parentCategory", model: Categories });
+        return { content: level3 }
+    } else {
+        return { content: [] }
+    }
+}
+
 export const getSearchCategory = async (req) => {
     if (req.body.search) {
         const { pageNumber, pageSize } = req.body;

@@ -105,6 +105,7 @@ export const findProductById = async (id) => {
 export const getAllProduct = async (reqQuery) => {
     let { thirdCategory, gender, category, search, color, sizes, minPrice, maxPrice, available, minDiscount, sort, pageNumber, pageSize } = reqQuery;
     pageSize = pageSize || 12;
+    pageNumber = pageNumber || 1;
 
     let query = Product.find().populate({ path: "category", model: Categories, populate: { path: "parentCategory", model: Categories } });
 
@@ -126,7 +127,6 @@ export const getAllProduct = async (reqQuery) => {
 
     if (color) {
         let clr = color.trim().toLowerCase()
-        console.log(clr);
         query = query.where("sizesAndColor.color").in(clr)
     }
 
@@ -167,7 +167,7 @@ export const getAllProduct = async (reqQuery) => {
         query = (await query).filter((ele) => ele.title.toLowerCase().includes(search.toLowerCase()))
     }
 
-    if (category) {
+    if (!thirdCategory && category) {
         const exitCategory = await Categories.findOne({ name: category });
         if (exitCategory) {
             query = (await query).filter((ele) => ele.category.parentCategory._id.toString() === exitCategory._id.toString())
@@ -181,11 +181,10 @@ export const getAllProduct = async (reqQuery) => {
         }
     }
 
-    if (gender || category || search) {
+    if (!thirdCategory && (gender || category || search)) {
         const totalProduct = (await query).length
         query = pageNumber === 1 ? query.slice(((pageNumber - 1) * pageSize), pageSize) : query.slice(((pageNumber - 1) * pageSize), ((pageNumber - 1) * pageSize) + Number(pageSize))
         const totalPages = Math.ceil(totalProduct / pageSize);
-
         return { content: query, currentPage: pageNumber, totalPages }
     } else {
         const totalQuantity = await Product.countDocuments(query);
@@ -263,11 +262,8 @@ export const createMultipleProduct = async (products) => {
 // ];
 
 // const pipe = await pipeline.filter((ele) => ele)
-// console.log(pipe, "pipe");
 // let query = await Product.aggregate(pipe)
-// // console.log(query, "query");
 
 // const finalQuery = await Product.aggregate(pipe);
 
 // await Product.populate(finalQuery, { path: "category", model: Categories });
-// console.log(finalQuery, "finalQuery");
