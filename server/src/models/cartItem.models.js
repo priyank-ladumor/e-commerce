@@ -6,9 +6,10 @@ const cartItemsSchema = new Schema({
     cart: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cart", required: true }],
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }],
     size: { type: String, required: true },
+    color: { type: String, required: true },
     quantity: { type: Number, required: true, default: 1 },
     price: { type: Number, required: true },
-    discountedPrice: { type: Number, required: true},
+    // discountedPrice: { type: Number, required: true},
 });
 
 export const CartItem = mongoose.model("CartItem", cartItemsSchema);
