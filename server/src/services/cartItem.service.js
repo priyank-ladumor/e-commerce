@@ -19,7 +19,8 @@ export const findCartItemById = async (cartItemId) => {
 
 export const updateCartItem = async (userId, cartItemId, cartItemData) => {
     try {
-        const item = await findCartItemById(cartItemId);
+        // const item = await findCartItemById(cartItemId);
+        const item = await CartItem.findOne({ _id: cartItemId, size: cartItemData.size, color: cartItemData.color }).populate({ path: "product", model: Product });
         if (!item) {
             throw new Error("cart item not found", cartItemId)
         }
@@ -28,27 +29,27 @@ export const updateCartItem = async (userId, cartItemId, cartItemData) => {
         if (!user) {
             throw new Error("user not found", userId)
         }
-        console.log(user, "u");
+        console.log(cartItemData.quantity === "plus", "item");
         if (user._id.toString() === userId.toString()) {
+            const findCart = await Cart.findOne({ user: userId })
+            cartItemData.order === "plus" ? findCart.totalPrice = (findCart.totalPrice) + (item.product[0].discountPrice) :
+                findCart.totalPrice = (findCart.totalPrice) - (item.product[0].discountPrice);
+            await findCart.save();
             item.quantity = cartItemData.quantity;
-            item.price = item.quantity * item.product[0].price;
-            item.discountedPrice = item.quantity * item.product[0].discountPrice;
+            item.price = item.quantity * item.product[0].discountPrice;
             const updatedCartItem = await item.save();
-            await Cart.findOneAndUpdate({ user: userId }, { totalPrice: item.price, totalDiscountedPrice: item.discountedPrice, totalItem: item.quantity }, { new: true })
             return updatedCartItem;
         } else {
             throw new Error("you can`t update this cart item")
         }
-
     } catch (error) {
         throw new Error(error.message)
     }
 }
 
-
 export const removeCartItem = async (userId, cartItemId, size, color) => {
     try {
-        const cartItem = await CartItem.findOne({_id: cartItemId, size: size, color: "#" + color});
+        const cartItem = await CartItem.findOne({ _id: cartItemId, size: size, color: "#" + color });
         if (!cartItem) {
             throw new Error("no cartitem availble on this id")
         }
