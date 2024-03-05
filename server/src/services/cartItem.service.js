@@ -46,16 +46,21 @@ export const updateCartItem = async (userId, cartItemId, cartItemData) => {
 }
 
 
-export const removeCartItem = async (userId, cartItemId) => {
+export const removeCartItem = async (userId, cartItemId, size, color) => {
     try {
-        const cartItem = await CartItem.findById(cartItemId);
+        const cartItem = await CartItem.findOne({_id: cartItemId, size: size, color: "#" + color});
         if (!cartItem) {
             throw new Error("no cartitem availble on this id")
         }
         const user = await findUserById(userId);
         if (user._id.toString() === cartItem.user.toString()) {
+            const userCartItems = await Cart.findOne({ user: userId });
+            userCartItems.totalItem = userCartItems.totalItem - 1;
+            userCartItems.totalPrice = userCartItems.totalPrice - cartItem.price;
+            userCartItems.save();
             await CartItem.findByIdAndDelete(cartItemId)
             await Cart.updateOne({ user: userId }, { $pull: { cartItem: cartItemId } })
+            return "Cart item removed successfully"
         } else {
             throw new Error("you can`t remove another user items")
         }

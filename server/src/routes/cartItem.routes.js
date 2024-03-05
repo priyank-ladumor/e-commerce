@@ -5,6 +5,6 @@ const cartItemRouter = express.Router()
 
 cartItemRouter
     .put("/:id", authenticate, updateCartItemController)
-    .delete("/:id", authenticate, removeCartItemController)
+    .delete("/:size/:color/:id", authenticate, removeCartItemController)
 
 export { cartItemRouter };

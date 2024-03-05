@@ -13,7 +13,7 @@ export const updateCartItemController = async (req, res) => {
 export const removeCartItemController = async (req, res) => {
     const user = req.user;
     try {
-        await removeCartItem(user._id, req.params.id)
+        await removeCartItem(user._id, req.params.id, req.params.size, req.params.color)
         return res.status(200).send({ msg: "cart item remove successfully" });
     } catch (error) {
         return res.status(500).send({ msg: error.message });
