@@ -202,6 +202,37 @@ export const createMultipleProduct = async (products) => {
     }
 }
 
+export const getMenProducts = async () => {
+    let query = Product.find().populate({ path: "category", model: Categories, populate: { path: "parentCategory", model: Categories } })
+    const exitCategory = await Categories.findOne({ name: "men" });
+    if (exitCategory) {
+        query = (await query).filter((ele) => ele.category.parentCategory.parentCategory._id.toString() === exitCategory._id.toString())
+        return query
+    } else {
+        throw new Error("no available  men category");
+    }
+}
+export const getWomenProducts = async () => {
+    let query = Product.find().populate({ path: "category", model: Categories, populate: { path: "parentCategory", model: Categories } })
+    const exitCategory = await Categories.findOne({ name: "women" });
+    if (exitCategory) {
+        query = (await query).filter((ele) => ele.category.parentCategory.parentCategory._id.toString() === exitCategory._id.toString())
+        return query
+    } else {
+        throw new Error("no available  women category");
+    }
+}
+export const getKidsProducts = async () => {
+    let query = Product.find().populate({ path: "category", model: Categories, populate: { path: "parentCategory", model: Categories } })
+    const exitCategory = await Categories.findOne({ name: "kids" });
+    if (exitCategory) {
+        query = (await query).filter((ele) => ele.category.parentCategory.parentCategory._id.toString() === exitCategory._id.toString())
+        return query
+    } else {
+        throw new Error("no available kids category");
+    }
+}
+
 
 
 
