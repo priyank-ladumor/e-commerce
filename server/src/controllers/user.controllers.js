@@ -1,7 +1,7 @@
 import { User } from "../models/user.models.js";
 import bcrypt from "bcrypt"
 import { getUserIdFromToken, generateToken } from "../middlewares/jwtProvider.js"
-import { findUserByEmail, findUserById, findUserByToken, userDeleteById, userProfileUpdate } from "../services/user.service.js";
+import { findUserByEmail, findUserById, findUserByToken, resetPassword, userDeleteById, userProfileUpdate } from "../services/user.service.js";
 import * as fs from 'fs';
 import handlebars from "handlebars"
 import { sendEmail } from "../services/email.service.js";
@@ -188,6 +188,17 @@ const userProfileUpdateController = async (req, res) => {
     }
 }
 
+const resetPasswordController = async (req, res) => {
+    try {
+        const reset = await resetPassword(req);
+        if (reset) {
+            res.status(301).send({ msg: "User Password Reset Successfully" });
+        }
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
 
 
-export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, userDeleteByIdController, userBannedByIdController, userActiveByIdController, userProfileUpdateController }
+
+export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, userDeleteByIdController, userBannedByIdController, userActiveByIdController, userProfileUpdateController, resetPasswordController }

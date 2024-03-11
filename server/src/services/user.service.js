@@ -1,5 +1,6 @@
 import { getUserIdFromToken } from "../middlewares/jwtProvider.js"
 import { User } from "../models/user.models.js"
+import bcrypt from "bcrypt"
 
 const findUserByEmail = async (email) => {
     try {
@@ -63,6 +64,27 @@ const userProfileUpdate = async (req) => {
     }
 }
 
+const resetPassword = async (req) => {
+    const { oldPassword, newPassword } = req.body;
+    const { id } = req.params;
+    const user = req.user;
+    const findUser = await User.findById(id)
+
+    if (findUser._id.toString() === user._id.toString()) {
+        const pass = await bcrypt.compareSync(oldPassword,findUser.password);
+        if (pass) {
+            const NewPass = await bcrypt.hashSync(newPassword, 10);
+            findUser.password = NewPass;
+            findUser.save();
+            return findUser;
+        }else{
+            throw new Error("old password is wrong")
+        }
+    } else {
+        throw new Error("token is not valid")
+    }
+}
 
 
-export { findUserById, findUserByEmail, findUserByToken, userDeleteById, userProfileUpdate }
+
+export { findUserById, findUserByEmail, findUserByToken, userDeleteById, userProfileUpdate, resetPassword }

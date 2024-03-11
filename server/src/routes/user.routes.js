@@ -1,5 +1,5 @@
 import express from "express"
-import { getAllUserProfiles, userDeleteByIdController, userBannedByIdController, userActiveByIdController, userProfileUpdateController } from "../controllers/user.controllers.js"
+import { getAllUserProfiles, userDeleteByIdController, userBannedByIdController, userActiveByIdController, userProfileUpdateController, resetPasswordController } from "../controllers/user.controllers.js"
 import { authenticate } from "../middlewares/authenticate.js";
 import { createUser, getUserProfile, loginUser, userEmailVerifiedByToken } from "../controllers/user.controllers.js"
 const userRouter = express.Router()
@@ -13,5 +13,6 @@ userRouter.post("/signup", createUser)
     .get("/unbanned/:id", userActiveByIdController)
     .get("/", authenticate, getUserProfile)
     .put("/update",authenticate, userProfileUpdateController)
+    .put("/reset-password/:id",authenticate, resetPasswordController)
 
 export { userRouter };
