@@ -1,7 +1,7 @@
 import { User } from "../models/user.models.js";
 import bcrypt from "bcrypt"
 import { getUserIdFromToken, generateToken } from "../middlewares/jwtProvider.js"
-import { findUserByEmail, findUserById, findUserByToken, userDeleteById } from "../services/user.service.js";
+import { findUserByEmail, findUserById, findUserByToken, userDeleteById, userProfileUpdate } from "../services/user.service.js";
 import * as fs from 'fs';
 import handlebars from "handlebars"
 import { sendEmail } from "../services/email.service.js";
@@ -177,26 +177,17 @@ const userActiveByIdController = async (req, res) => {
     }
 }
 
-// const getSearchUsersController = async (req, res) => {
-// console.log(req);
-// const { pageNumber, pageSize, search } = req.body;
-// if (search && pageNumber && pageSize) {
-// let query = User.find({ email: { $regex: '.*' + search + '.*' } })
-// const totalQuantity = await User.countDocuments(query);
-// const finalQuery = await query.skip((pageNumber - 1) * pageSize).limit(pageSize);
-// const totalPages = Math.ceil(totalQuantity / pageSize);
-
-// return { content: finalQuery, currentPage: pageNumber, totalPages: totalPages }
-// } else {
-//     throw new Error("did not get search data")
-// }
-// try {
-// const searchQuery =  (await User.find()).filter(item => item.email.includes(req.query.search))
-// } catch (error) {
-// return res.status(500).send({ msg: error.message })
-// }
-// }
+const userProfileUpdateController = async (req, res) => {
+    try {
+        const updateProfile = await userProfileUpdate(req);
+        if (updateProfile) {
+            res.status(301).send({ msg: "User Profile Updated Successfully" });
+        }
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
 
 
 
-export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, userDeleteByIdController, userBannedByIdController, userActiveByIdController }
+export { createUser, loginUser, userEmailVerifiedByToken, getUserProfile, userDeleteByIdController, userBannedByIdController, userActiveByIdController, userProfileUpdateController }

@@ -50,5 +50,19 @@ const findUserByToken = async (token) => {
     }
 }
 
+const userProfileUpdate = async (req) => {
+    const { firstName, lastName, email, mobile, profileImg } = req.body;
+    const user = req.user;
+    if (user) {
+        const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg, mobile, firstName, lastName, email });
+        if (userData) {
+            return userData
+        }
+    } else {
+        throw new Error("token is not valid")
+    }
+}
 
-export { findUserById, findUserByEmail, findUserByToken, userDeleteById }
+
+
+export { findUserById, findUserByEmail, findUserByToken, userDeleteById, userProfileUpdate }

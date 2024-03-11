@@ -26,24 +26,6 @@ export const findUserCart = async (userId) => {
             return "No User Cart Products"
         }
 
-        // let totalPrice = 0;
-        // let totalItems = 0;
-        // let totalDiscountedPrice = 0;
-
-        // for (let cartItem of cart[0].cartItem) {
-        //     totalPrice += cartItem.price;
-        //     totalItems += cartItem.quantity;
-        //     totalDiscountedPrice += cartItem.discountedPrice;
-        // }
-
-        // let cartUpdate = await Cart.findOneAndUpdate({ user: userId }, { totalPrice: totalPrice, totalDiscountedPrice: totalDiscountedPrice, totalItem: totalItems }, { new: true })
-        //     .populate({
-        //         path: "cartItem", model: CartItem, populate: {
-        //             path: "product", model: Product
-        //         }
-        //     });
-        // return cartUpdate;
-
     } catch (error) {
         throw new Error(error.message)
     }
@@ -58,7 +40,6 @@ export const addCartItem = async (userId, req) => {
         }
         const cartData = await Cart.findOne({ user: userId });
         let isPresentCartItem = await CartItem.findOne({ user: userId, product: product._id, cart: cartData._id, size: req.size, color: req.color });
-        console.log(isPresentCartItem, "isPresentCartItem");
         if (!isPresentCartItem) {
             const cartItem = new CartItem({
                 product: product._id,
