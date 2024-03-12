@@ -1,6 +1,7 @@
 import { getUserIdFromToken } from "../middlewares/jwtProvider.js"
 import { User } from "../models/user.models.js"
 import bcrypt from "bcrypt"
+import { uploadOnCloudinary } from "../multer/cloudinary.js"
 
 const findUserByEmail = async (email) => {
     try {
@@ -55,9 +56,17 @@ const userProfileUpdate = async (req) => {
     const { firstName, lastName, email, mobile, profileImg } = req.body;
     const user = req.user;
     if (user) {
-        const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg, mobile, firstName, lastName, email });
-        if (userData) {
-            return userData
+        if (profileImg?.length > 0) {
+            const img = await uploadOnCloudinary(profileImg);
+            const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg: img, mobile, firstName, lastName, email });
+            if (userData) {
+                return userData
+            }
+        } else {
+            const userData = await User.findByIdAndUpdate({ _id: user._id }, { mobile, firstName, lastName, email });
+            if (userData) {
+                return userData
+            }
         }
     } else {
         throw new Error("token is not valid")
@@ -71,13 +80,13 @@ const resetPassword = async (req) => {
     const findUser = await User.findById(id)
 
     if (findUser._id.toString() === user._id.toString()) {
-        const pass = await bcrypt.compareSync(oldPassword,findUser.password);
+        const pass = await bcrypt.compareSync(oldPassword, findUser.password);
         if (pass) {
             const NewPass = await bcrypt.hashSync(newPassword, 10);
             findUser.password = NewPass;
             findUser.save();
             return findUser;
-        }else{
+        } else {
             throw new Error("old password is wrong")
         }
     } else {

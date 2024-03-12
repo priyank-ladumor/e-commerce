@@ -181,7 +181,7 @@ const userProfileUpdateController = async (req, res) => {
     try {
         const updateProfile = await userProfileUpdate(req);
         if (updateProfile) {
-            res.status(301).send({ msg: "User Profile Updated Successfully" });
+            res.status(200).send({ msg: "User Profile Updated Successfully" });
         }
     } catch (error) {
         return res.status(500).send({ msg: error.message });
@@ -192,7 +192,7 @@ const resetPasswordController = async (req, res) => {
     try {
         const reset = await resetPassword(req);
         if (reset) {
-            res.status(301).send({ msg: "User Password Reset Successfully" });
+            res.status(200).send({ msg: "User Password Reset Successfully" });
         }
     } catch (error) {
         return res.status(500).send({ msg: error.message });

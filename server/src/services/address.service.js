@@ -30,10 +30,27 @@ export const deleteAddress = async (req) => {
     const user = req.user;
     if (id) {
         const address = await Address.findById(id)
-        if(user._id.toString() === address.user.toString()) {
+        if (user._id.toString() === address.user.toString()) {
             const deleteAdd = await Address.findByIdAndDelete(id)
             return deleteAdd;
-        }else{
+        } else {
+            throw new Error('invalid token');
+        }
+    } else {
+        throw new Error('id not found');
+    }
+}
+
+export const getUserAddress = async (req) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    if (id) {
+        const address = await Address.find();
+        if (user?._id.toString() === id.toString()) {
+            const findUserAddress = address?.filter((ele) => ele.user[0].toString() === user._id.toString())
+            return findUserAddress;
+        } else {
             throw new Error('invalid token');
         }
     } else {
