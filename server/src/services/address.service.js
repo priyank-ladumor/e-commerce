@@ -28,8 +28,10 @@ export const createAddress = async (req) => {
 export const deleteAddress = async (req) => {
     const { id } = req.params;
     const user = req.user;
+    console.log(id);
     if (id) {
         const address = await Address.findById(id)
+        console.log(address);
         if (user._id.toString() === address.user.toString()) {
             const deleteAdd = await Address.findByIdAndDelete(id)
             return deleteAdd;

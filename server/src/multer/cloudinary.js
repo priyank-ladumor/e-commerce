@@ -13,7 +13,6 @@ export const uploadOnCloudinary = async (localFilePath) => {
         // base64 imgs
         if (!localFilePath) return null
         let imgUrls = []
-        console.log(localFilePath);
         for (let i = 0; i < localFilePath.length; i++) {
             console.log(localFilePath[i]);
             const res = await cloudinary.uploader.upload(localFilePath[i], {

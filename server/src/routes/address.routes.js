@@ -5,7 +5,7 @@ const addressRouter = express.Router()
 
 addressRouter
     .post("/", authenticate, createAddressController)
-    .delete("/:id", authenticate, deleteAddressController)
+    .delete("/delete/:id", authenticate, deleteAddressController)
     .get("/:id", authenticate, getUserAddressController)
 
 export { addressRouter };

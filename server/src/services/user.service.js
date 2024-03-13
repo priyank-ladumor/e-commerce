@@ -2,6 +2,8 @@ import { getUserIdFromToken } from "../middlewares/jwtProvider.js"
 import { User } from "../models/user.models.js"
 import bcrypt from "bcrypt"
 import { uploadOnCloudinary } from "../multer/cloudinary.js"
+import { v2 as cloudinary } from 'cloudinary';
+
 
 const findUserByEmail = async (email) => {
     try {
@@ -56,14 +58,22 @@ const userProfileUpdate = async (req) => {
     const { firstName, lastName, email, mobile, profileImg } = req.body;
     const user = req.user;
     if (user) {
-        if (profileImg?.length > 0) {
-            const img = await uploadOnCloudinary(profileImg);
-            const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg: img, mobile, firstName, lastName, email });
+        const splitUserPic = user.profileImg[0]?.split("/")
+        if (profileImg?.length === 0) {
+            splitUserPic && cloudinary.uploader.destroy([splitUserPic[splitUserPic.length - 1]?.split(".")[0]], { type: 'upload', resource_type: 'image' });
+            const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg: [], mobile, firstName, lastName, email });
+            if (userData) {
+                return userData
+            }
+        } else if (profileImg && profileImg[0]?.includes("cloudinary")) {
+            const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg, mobile, firstName, lastName, email });
             if (userData) {
                 return userData
             }
         } else {
-            const userData = await User.findByIdAndUpdate({ _id: user._id }, { mobile, firstName, lastName, email });
+            splitUserPic && cloudinary.uploader.destroy([splitUserPic[splitUserPic.length - 1]?.split(".")[0]], { type: 'upload', resource_type: 'image' });
+            const img = await uploadOnCloudinary(profileImg);
+            const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg: img, mobile, firstName, lastName, email });
             if (userData) {
                 return userData
             }
