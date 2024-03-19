@@ -19,7 +19,6 @@ export const findUserCart = async (userId) => {
                 path: "product", model: Product
             }
         });
-
         if(cart){
             return cart;
         }else{

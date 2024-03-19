@@ -1,33 +1,32 @@
 import { Address } from "../models/address.models.js"
 import { Order } from "../models/order.models.js"
-import { findUserCart } from "./cart.service.js"
 import { OrderItem } from "../models/orderItem.models.js"
+import { CartItem } from "../models/cartItem.models.js"
+import { Product } from "../models/product.models.js"
+import { User } from "../models/user.models.js"
+import { Cart } from "../models/cart.models.js"
+import { deleteCartItem, findCartItemById } from "./cartItem.service.js"
+import { findProductById } from "./product.service.js"
 
-export const createOrder = async (user, shipAddress) => {
-    let addr;
+export const createOrder = async (user, body) => {
+    const { selectedAddress, paymentSys, cartId } = body;
+    const address = await Address.findById(selectedAddress);
 
-    if (shipAddress._id) {
-        const exitAddress = await Address.findOne(shipAddress._id);
-        await addr === exitAddress;
-    } else {
-        addr = new Address(shipAddress);
-        addr.user = user;
-        // user.address.push(addr);
-        // await user.save()
-        await addr.save()
-    }
-
-    const cart = await findUserCart(user._id);
+    let cart = await Cart.findById({ _id: cartId }).populate({
+        path: "cartItem", model: CartItem, populate: {
+            path: "product", model: Product
+        }
+    })
     const OrderItems = [];
 
     for (const item of cart.cartItem) {
         const orderItemCreate = new OrderItem({
-            price: item.price,
             product: item.product,
-            quantity: item.quantity,
+            user: item.user,
             size: item.size,
-            user_id: item.user,
-            discountedPrice: item.discountedPrice,
+            color: item.color,
+            quantity: item.quantity,
+            price: item.price
         })
 
         const createdOrderItem = await orderItemCreate.save();
@@ -35,17 +34,42 @@ export const createOrder = async (user, shipAddress) => {
     }
 
     const createdOrder = new Order({
-        user,
-        orderItem: OrderItems,
+        shippingAddress: address,
         totalPrice: cart.totalPrice,
-        totalDiscountedPrice: cart.totalDiscountedPrice,
-        discount: cart.discount,
+        orderItem: OrderItems,
         totalItem: cart.totalItem,
-        shippingAddress: addr,
+        user: cart.user,
     })
-
+    createdOrder.paymentDetails.paymentMethod = paymentSys;
     const savedOrder = await createdOrder.save();
-    return savedOrder;
+
+    const delCartItem = cart?.cartItem?.map((ele) => ele._id);
+    for (let id of delCartItem) {
+        const findCartItem = await findCartItemById(id);
+        const product = await findProductById(findCartItem?.product[0]?._id)
+        product.quantity = product.quantity - findCartItem?.quantity;
+        const updateQuantityId = product.sizesAndColor?.filter((ele) =>
+            ele.size === findCartItem?.size && ele.color === findCartItem?.color
+        )
+        const QuantityUpdate =
+
+            await Product.updateOne({
+                _id: findCartItem?.product[0]?._id,
+                "sizesAndColor._id": updateQuantityId[0]?._id,
+            }, {
+                $set: {
+                    'sizesAndColor.$.quantity': updateQuantityId[0]?.quantity - findCartItem?.quantity,
+                }
+            })
+        await product.save();
+
+        const del = await deleteCartItem(id)
+    }
+    await Cart.findByIdAndDelete(cartId)
+
+    if (savedOrder) {
+        return "Order Created Successfully";
+    }
 }
 
 

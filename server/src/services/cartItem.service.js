@@ -5,15 +5,11 @@ import { Product } from "../models/product.models.js"
 
 
 export const findCartItemById = async (cartItemId) => {
-    try {
-        const cartItem = await CartItem.findOne({ cart: cartItemId }).populate({ path: "product", model: Product })
-        if (cartItem) {
-            return cartItem;
-        } else {
-            throw new Error("cartItem not found")
-        }
-    } catch (error) {
-        throw new Error(error.message)
+    const cartItem = await CartItem.findOne({ _id: cartItemId }).populate({ path: "product", model: Product })
+    if (cartItem) {
+        return cartItem;
+    } else {
+        throw new Error("cartItem not found")
     }
 }
 
@@ -29,7 +25,6 @@ export const updateCartItem = async (userId, cartItemId, cartItemData) => {
         if (!user) {
             throw new Error("user not found", userId)
         }
-        console.log(cartItemData.quantity === "plus", "item");
         if (user._id.toString() === userId.toString()) {
             const findCart = await Cart.findOne({ user: userId })
             cartItemData.order === "plus" ? findCart.totalPrice = (findCart.totalPrice) + (item.product[0].discountPrice) :
@@ -67,5 +62,14 @@ export const removeCartItem = async (userId, cartItemId, size, color) => {
         }
     } catch (error) {
         throw new Error(error.message)
+    }
+}
+
+export const deleteCartItem = async (cartItemId) => {
+    if (cartItemId) {
+        const cartItem = await CartItem.findByIdAndDelete({ _id: cartItemId });
+        return cartItem
+    } else {
+        throw new Error("did not get cart item id ")
     }
 }
