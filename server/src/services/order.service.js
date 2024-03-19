@@ -8,6 +8,21 @@ import { Cart } from "../models/cart.models.js"
 import { deleteCartItem, findCartItemById } from "./cartItem.service.js"
 import { findProductById } from "./product.service.js"
 
+export const checkProductQuantityAvailable = async (body) => {
+    const { pid, quantity, color, size } = body;
+    if (pid && quantity && color && size) {
+        const product = await Product.findOne({ _id: pid });
+        const matchSizeAndColor = product.sizesAndColor.filter((ele) => ele.size === size && ele.color === color)
+        if (matchSizeAndColor[0].quantity >= quantity) {
+            return "quantity available"
+        } else {
+            throw new Error(`This size: ${size} and title: ${product.title} has ${matchSizeAndColor[0].quantity} quantity left`);
+        }
+    } else {
+        throw new Error('body data not received');
+    }
+}
+
 export const createOrder = async (user, body) => {
     const { selectedAddress, paymentSys, cartId } = body;
     const address = await Address.findById(selectedAddress);
@@ -43,29 +58,29 @@ export const createOrder = async (user, body) => {
     createdOrder.paymentDetails.paymentMethod = paymentSys;
     const savedOrder = await createdOrder.save();
 
-    const delCartItem = cart?.cartItem?.map((ele) => ele._id);
-    for (let id of delCartItem) {
-        const findCartItem = await findCartItemById(id);
-        const product = await findProductById(findCartItem?.product[0]?._id)
-        product.quantity = product.quantity - findCartItem?.quantity;
-        const updateQuantityId = product.sizesAndColor?.filter((ele) =>
-            ele.size === findCartItem?.size && ele.color === findCartItem?.color
-        )
-        const QuantityUpdate =
+    // const delCartItem = cart?.cartItem?.map((ele) => ele._id);
+    // for (let id of delCartItem) {
+    //     const findCartItem = await findCartItemById(id);
+    //     const product = await findProductById(findCartItem?.product[0]?._id)
+    //     product.quantity = product.quantity - findCartItem?.quantity;
+    //     const updateQuantityId = product.sizesAndColor?.filter((ele) =>
+    //         ele.size === findCartItem?.size && ele.color === findCartItem?.color
+    //     )
+    //     const QuantityUpdate =
 
-            await Product.updateOne({
-                _id: findCartItem?.product[0]?._id,
-                "sizesAndColor._id": updateQuantityId[0]?._id,
-            }, {
-                $set: {
-                    'sizesAndColor.$.quantity': updateQuantityId[0]?.quantity - findCartItem?.quantity,
-                }
-            })
-        await product.save();
+    //         await Product.updateOne({
+    //             _id: findCartItem?.product[0]?._id,
+    //             "sizesAndColor._id": updateQuantityId[0]?._id,
+    //         }, {
+    //             $set: {
+    //                 'sizesAndColor.$.quantity': updateQuantityId[0]?.quantity - findCartItem?.quantity,
+    //             }
+    //         })
+    //     await product.save();
 
-        const del = await deleteCartItem(id)
-    }
-    await Cart.findByIdAndDelete(cartId)
+    //     const del = await deleteCartItem(id)
+    // }
+    // await Cart.findByIdAndDelete(cartId)
 
     if (savedOrder) {
         return "Order Created Successfully";
