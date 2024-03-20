@@ -101,8 +101,6 @@ export const createOrder = async (user, body) => {
             return "Order Created Successfully";
         }
     }
-
-
 }
 
 
@@ -110,9 +108,22 @@ export const findOrderById = async (orderId) => {
     const order = await Order.findById(orderId)
         .populate("user")
         .populate("shippingAddress")
-        .populate({ path: "OrderItem", populate: { path: "Product" } })
-
+        .populate({
+            path: "orderItem", model: OrderItem, populate: {
+                path: "product", model: Product
+            }
+        })
     return order;
+}
+
+export const findAllUserOrder = async (userId) => {
+    const findAllOrder = await Order.find({ user: userId }).populate({
+        path: "orderItem", model: OrderItem, populate: {
+            path: "product", model: Product
+        }
+    })
+
+    return findAllOrder;
 }
 
 export const placeOrder = async (orderId) => {
@@ -145,11 +156,28 @@ export const deliverOrder = async (orderId) => {
     return await order.save()
 }
 
-export const cancelOrder = async (orderId) => {
+export const cancelOrder = async (user, orderId) => {
     const order = await findOrderById(orderId);
+    const sizesAndColorID = order.orderItem[0].product[0]?.sizesAndColor.filter((item) =>  item.size === order.orderItem[0].size && item.color === order.orderItem[0].color )
 
-    order.orderStatus = "CANCELLED";
-    return await order.save()
+    // order.orderStatus = "CANCELLED";
+    // order.orderItem[0].product[0].quantity = order.orderItem[0].product[0].quantity + order.orderItem[0].quantity
+    // return await order.save()
+
+
+
+    await Product.updateOne({
+        _id: order.orderItem[0].product[0]?._id,
+        "sizesAndColor._id": sizesAndColorID[0]._id,
+    }, {
+        $set: {
+            'sizesAndColor.$.quantity': updateQuantityId[0]?.quantity - findCartItem?.quantity,
+        }
+    })
+
+    console.log(order.orderItem[0].size, "size");
+    console.log(order.orderItem[0].color, "color");
+
 }
 
 export const userOrderHistory = async (userId) => {
