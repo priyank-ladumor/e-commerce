@@ -117,6 +117,16 @@ export const findOrderById = async (orderId) => {
     return order;
 }
 
+export const findAllOrder = async () => {
+    const findOrder = await Order.find().populate("shippingAddress").populate({
+        path: "orderItem", model: OrderItem, populate: {
+            path: "product", model: Product
+        }
+    })
+
+    return findOrder;
+}
+
 export const findAllUserOrder = async (userId) => {
     const findAllOrder = await Order.find({ user: userId }).populate({
         path: "orderItem", model: OrderItem, populate: {

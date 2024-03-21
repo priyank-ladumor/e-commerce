@@ -1,4 +1,4 @@
-import { cancelOrder, checkProductQuantityAvailable, createOrder, findAllUserOrder, findOrderById, removeOrder, userOrderHistory } from "../services/order.service.js";
+import { cancelOrder, checkProductQuantityAvailable, createOrder, findAllOrder, findAllUserOrder, findOrderById, removeOrder, userOrderHistory } from "../services/order.service.js";
 
 export const createOrderController = async (req, res) => {
     const user = req.user;
@@ -36,6 +36,15 @@ export const findAllUserOrderController = async (req, res) => {
     try {
         const getAllUserOrder = await findAllUserOrder(user)
         return res.status(201).send(getAllUserOrder);
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const findAllOrderController = async (req, res) => {
+    try {
+        const getAllOrder = await findAllOrder()
+        return res.status(201).send(getAllOrder);
     } catch (error) {
         return res.status(500).send({ msg: error.message });
     }
