@@ -73,6 +73,7 @@ export const createOrder = async (user, body) => {
         const savedOrder = await createdOrder.save();
 
         const delCartItem = cart?.cartItem?.map((ele) => ele._id);
+        
         for (let id of delCartItem) {
             const findCartItem = await findCartItemById(id);
             const product = await findProductById(findCartItem?.product[0]?._id)
@@ -156,28 +157,38 @@ export const deliverOrder = async (orderId) => {
     return await order.save()
 }
 
+export const removeOrder = async (orderId) => {
+    const order = await Order.findById(orderId);
+    await Order.findByIdAndDelete(orderId);
+    for (let id of order.orderItem) {
+        await OrderItem.findByIdAndDelete(id);
+    }
+    if (order) {
+        return "Order removed successfully"
+    } else {
+        return "Unable to remove the order"
+    }
+}
+
 export const cancelOrder = async (user, orderId) => {
     const order = await findOrderById(orderId);
-    const sizesAndColorID = order.orderItem[0].product[0]?.sizesAndColor.filter((item) =>  item.size === order.orderItem[0].size && item.color === order.orderItem[0].color )
-
-    // order.orderStatus = "CANCELLED";
-    // order.orderItem[0].product[0].quantity = order.orderItem[0].product[0].quantity + order.orderItem[0].quantity
-    // return await order.save()
-
-
+    const sizesAndColorID = order.orderItem[0].product[0]?.sizesAndColor.filter((item) => item.size === order.orderItem[0]?.size && item.color === order.orderItem[0]?.color)
 
     await Product.updateOne({
-        _id: order.orderItem[0].product[0]?._id,
+        _id: order.orderItem[0]?.product[0]?._id,
         "sizesAndColor._id": sizesAndColorID[0]._id,
     }, {
         $set: {
-            'sizesAndColor.$.quantity': updateQuantityId[0]?.quantity - findCartItem?.quantity,
+            'sizesAndColor.$.quantity': sizesAndColorID[0]?.quantity + order.orderItem[0]?.quantity,
         }
     })
 
-    console.log(order.orderItem[0].size, "size");
-    console.log(order.orderItem[0].color, "color");
+    await Product.updateOne({ _id: order.orderItem[0]?.product[0]?._id }, { quantity: order.orderItem[0]?.product[0].quantity + order.orderItem[0]?.quantity })
 
+    order.orderStatus = "CANCELLED";
+    // order.orderItem[0].product[0].quantity = order.orderItem[0].product[0].quantity + order.orderItem[0].quantity
+    await order.save()
+    return "Order Successfully Canceled"
 }
 
 export const userOrderHistory = async (userId) => {

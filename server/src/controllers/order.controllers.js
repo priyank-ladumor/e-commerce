@@ -1,4 +1,4 @@
-import { cancelOrder, checkProductQuantityAvailable, createOrder, findAllUserOrder, findOrderById, userOrderHistory } from "../services/order.service.js";
+import { cancelOrder, checkProductQuantityAvailable, createOrder, findAllUserOrder, findOrderById, removeOrder, userOrderHistory } from "../services/order.service.js";
 
 export const createOrderController = async (req, res) => {
     const user = req.user;
@@ -14,7 +14,17 @@ export const CancelOrderController = async (req, res) => {
     const user = req.user;
     const { orderId } = req.params;
     try {
-        const rmvOrder = await cancelOrder(user,orderId)
+        const cncelOrder = await cancelOrder(user,orderId)
+        return res.status(201).send(cncelOrder);
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const removeOrderController = async (req, res) => {
+    const { orderId } = req.params;
+    try {
+        const rmvOrder = await removeOrder(orderId)
         return res.status(201).send(rmvOrder);
     } catch (error) {
         return res.status(500).send({ msg: error.message });
