@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose"
 
 const bannerSchema = new Schema({
     BannerImgs: [
-        { type: String, required: true }
+        { String }
     ]
 });
 
