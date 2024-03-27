@@ -8,13 +8,11 @@ cloudinary.config({
 });
 
 export const uploadOnCloudinary = async (localFilePath) => {
-
     try {
         // base64 imgs
         if (!localFilePath) return null
         let imgUrls = []
         for (let i = 0; i < localFilePath.length; i++) {
-            console.log(localFilePath[i]);
             const res = await cloudinary.uploader.upload(localFilePath[i], {
                 resource_type: "auto"
             })

@@ -14,6 +14,8 @@ import { ratingRouter } from "./routes/rating.routes.js";
 import { categoriesRouter } from "./routes/categories.routes.js";
 import { sizeRouter } from "./routes/size.routes.js";
 import { addressRouter } from "./routes/address.routes.js";
+import { bannerRouter } from "./routes/banner.routes.js";
+
 
 const app = express()
 
@@ -39,22 +41,23 @@ app.use('/rating', ratingRouter)
 app.use('/categories', categoriesRouter)
 app.use('/size', sizeRouter)
 app.use('/address', addressRouter)
+app.use('/banner', bannerRouter)
 
-//cloudinary upload
-import { uploadOnCloudinary } from "./multer/cloudinary.js";
-import { Multer } from "./models/multer.js";
-import { upload } from "./multer/multer.js";
+// //cloudinary upload
+// import { uploadOnCloudinary } from "./multer/cloudinary.js";
+// import { Multer } from "./models/multer.js";
+// import { upload } from "./multer/multer.js";
 
-const uploadImgs = async (req, res) => {
-    const cloud = await uploadOnCloudinary(req.body.imgs);
-    //for formData
-    // const cloud = await uploadOnCloudinary(req.files);
-    const img = new Multer();
-    img.imgs = cloud
-    await img.save()
-    res.send(img)
-}
-app.post("/multer", upload.array('imgs'), uploadImgs)
-//cloudinary upload
+// const uploadImgs = async (req, res) => {
+//     const cloud = await uploadOnCloudinary(req.body.imgs);
+//     //for formData
+//     // const cloud = await uploadOnCloudinary(req.files);
+//     const img = new Multer();
+//     img.imgs = cloud
+//     await img.save()
+//     res.send(img)
+// }
+// app.post("/multer", upload.array('imgs'), uploadImgs)
+// //cloudinary upload
 
 export { app }
