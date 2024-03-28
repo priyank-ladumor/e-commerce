@@ -12,15 +12,22 @@ export const AddBanner = async (req) => {
         if (BannerImgs) {
             if (!banner) {
                 const img = await uploadOnCloudinary(BannerImgs);
+                const imgs = {
+                    img
+                }
                 const createBanner = new Banner({
-                    BannerImgs: { img, imgId: imgId },
+                    BannerImgs: imgs,
                 })
+                console.log('✌️imgs --->', imgs);
                 await createBanner.save();
                 return "Banner Added Successfully";
             } else {
                 if (banner.BannerImgs?.length <= 9) {
                     const img = await uploadOnCloudinary(BannerImgs);
-                    await Banner.findOneAndUpdate({ _id: banner._id }, { $push: { BannerImgs: { img, imgId: imgId } } });
+                    const imgs = {
+                        img
+                    }
+                    await Banner.findOneAndUpdate({ _id: banner._id }, { $push: { BannerImgs: imgs } });
                     return "Banner Added Successfully";
                 } else {
                     throw new Error('Max limit for banner is 10');
@@ -49,14 +56,26 @@ export const getAllBanner = async (req) => {
 }
 
 export const deleteBanner = async (req) => {
-    const { url } = req.params;
+    const { id } = req.params;
     const user = req.user;
     if (user) {
         const banner = await Banner.findOne();
-        const splitPic = url
-        splitPic && cloudinary.uploader.destroy([url?.split("/")[7].split(".")[0]], { type: 'upload', resource_type: 'image' });
+
         if (banner) {
-            await Banner.findOneAndUpdate({ _id: banner._id }, { $pull: { BannerImgs: url } });
+
+            const imgURL = banner?.BannerImgs?.filter((item) => item._id.toString() === id.toString())
+            imgURL && cloudinary.uploader.destroy([imgURL[0].img[0]?.split("/")[7].split(".")[0]], { type: 'upload', resource_type: 'image' });
+
+            const data = banner?.BannerImgs?.filter((item) => item._id.toString() !== id.toString());
+
+            await Banner.updateOne({
+                _id: banner._id,
+                "BannerImgs._id": id,
+            }, {
+                $set: {
+                    'BannerImgs': data
+                }
+            })
             return "Banner Removed Successfully!";
         } else {
             throw new Error('there is no banner added!');

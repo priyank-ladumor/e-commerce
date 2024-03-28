@@ -7,6 +7,6 @@ import { upload } from "../multer/multer.js";
 bannerRouter
     .post("/", authenticate, upload.fields([{ name: 'BannerImgs', maxCount: 10 }]), AddBannerController)
     .get("/", authenticate, getAllBannerController)
-    .delete("/:url", authenticate, deleteBannerController)
+    .delete("/:id", authenticate, deleteBannerController)
 
 export { bannerRouter };

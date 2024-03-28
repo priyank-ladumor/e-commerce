@@ -2,8 +2,10 @@ import mongoose, { Schema } from "mongoose"
 
 const bannerSchema = new Schema({
     BannerImgs: [
-        { String }
-    ]
+        {
+            img: [String],
+        }
+    ],
 });
 
 
