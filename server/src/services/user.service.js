@@ -58,9 +58,9 @@ const userProfileUpdate = async (req) => {
     const { firstName, lastName, email, mobile, profileImg } = req.body;
     const user = req.user;
     if (user) {
-        const splitUserPic = user.profileImg[0]?.split("/")
+        const splitUserPic = user?.profileImg && user.profileImg[0]?.split("/")
         if (profileImg?.length === 0) {
-            splitUserPic && cloudinary.uploader.destroy([splitUserPic[splitUserPic.length - 1]?.split(".")[0]], { type: 'upload', resource_type: 'image' });
+            splitUserPic && user.profileImg !== null && cloudinary.uploader.destroy([splitUserPic[splitUserPic.length - 1]?.split(".")[0]], { type: 'upload', resource_type: 'image' });
             const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg: [], mobile, firstName, lastName, email });
             if (userData) {
                 return userData
@@ -71,7 +71,7 @@ const userProfileUpdate = async (req) => {
                 return userData
             }
         } else {
-            splitUserPic && cloudinary.uploader.destroy([splitUserPic[splitUserPic.length - 1]?.split(".")[0]], { type: 'upload', resource_type: 'image' });
+            splitUserPic && user?.profileImg !== null && cloudinary.uploader.destroy([splitUserPic[splitUserPic.length - 1]?.split(".")[0]], { type: 'upload', resource_type: 'image' });
             const img = await uploadOnCloudinary(profileImg);
             const userData = await User.findByIdAndUpdate({ _id: user._id }, { profileImg: img, mobile, firstName, lastName, email });
             if (userData) {

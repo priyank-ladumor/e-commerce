@@ -15,6 +15,7 @@ import { categoriesRouter } from "./routes/categories.routes.js";
 import { sizeRouter } from "./routes/size.routes.js";
 import { addressRouter } from "./routes/address.routes.js";
 import { bannerRouter } from "./routes/banner.routes.js";
+import { logoRouter } from "./routes/logo.routes.js";
 
 
 const app = express()
@@ -42,6 +43,7 @@ app.use('/categories', categoriesRouter)
 app.use('/size', sizeRouter)
 app.use('/address', addressRouter)
 app.use('/banner', bannerRouter)
+app.use('/logo', logoRouter)
 
 // //cloudinary upload
 // import { uploadOnCloudinary } from "./multer/cloudinary.js";

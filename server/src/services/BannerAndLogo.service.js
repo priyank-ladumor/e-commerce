@@ -1,24 +1,23 @@
 import { Banner } from "../models/Banner.models.js";
+import { Logo } from "../models/Logo.models.js";
 import { uploadOnCloudinary } from "../multer/cloudinary.js"
 import { v2 as cloudinary } from 'cloudinary';
 
-
 export const AddBanner = async (req) => {
     const { BannerImgs } = req.body;
+
     const user = req.user;
     if (user) {
         const banner = await Banner.findOne();
-        const imgId = Math.floor(Math.random() * 100000 + 1)
         if (BannerImgs) {
             if (!banner) {
                 const img = await uploadOnCloudinary(BannerImgs);
                 const imgs = {
                     img
                 }
-                const createBanner = new Banner({
+                const createBanner = img && new Banner({
                     BannerImgs: imgs,
                 })
-                console.log('✌️imgs --->', imgs);
                 await createBanner.save();
                 return "Banner Added Successfully";
             } else {
@@ -27,9 +26,10 @@ export const AddBanner = async (req) => {
                     const imgs = {
                         img
                     }
-                    await Banner.findOneAndUpdate({ _id: banner._id }, { $push: { BannerImgs: imgs } });
+                    img && await Banner.findOneAndUpdate({ _id: banner._id }, { $push: { BannerImgs: imgs } });
                     return "Banner Added Successfully";
-                } else {
+                }
+                else {
                     throw new Error('Max limit for banner is 10');
                 }
             }
@@ -43,15 +43,11 @@ export const AddBanner = async (req) => {
 
 export const getAllBanner = async (req) => {
     const user = req.user;
-    if (user) {
-        const banner = await Banner.findOne();
-        if (banner) {
-            return banner.BannerImgs;
-        } else {
-            throw new Error('there is no banner added!');
-        }
+    const banner = await Banner.findOne();
+    if (banner) {
+        return banner.BannerImgs;
     } else {
-        throw new Error('User not found');
+        throw new Error('there is no banner added!');
     }
 }
 
@@ -82,5 +78,44 @@ export const deleteBanner = async (req) => {
         }
     } else {
         throw new Error('User not found');
+    }
+}
+
+
+export const addLogo = async (req) => {
+    const user = req.user;
+    const { logo } = req.body;
+    if (user) {
+        const res = await cloudinary.uploader.upload(logo[0], {
+            folder: 'Shoppy.io Logo',
+            resource_type: "auto"
+        })
+        const findLogo = await Logo.findOne()
+        if (findLogo === null) {
+            const createLogo = new Logo({
+                logo: res.secure_url
+            })
+            createLogo.save();
+            return "Logo Added Successfully!"
+        } else {
+            findLogo && cloudinary.uploader.destroy(["Shoppy.io Logo/" + findLogo.logo[0]?.split("/")[8].split(".")[0]], { type: 'upload', resource_type: 'image' });
+            const logoArr = [res.secure_url]
+            await Logo.findOneAndReplace({ _id: findLogo._id }, { logo: logoArr })
+            return "Logo Change Successfully!"
+        }
+    } else {
+        throw new Error('User not found or token expired ');
+    }
+}
+
+export const getLogo = async (req) => {
+    const findLogo = await Logo.findOne()
+    if (findLogo !== null) {
+        const LogoImg = {
+            logo: findLogo.logo[0]
+        }
+        return LogoImg;
+    } else {
+        throw new Error('no logo added');
     }
 }
