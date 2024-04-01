@@ -3,7 +3,6 @@ import express from "express";
 import cookieParser from "cookie-parser"
 import morgan from "morgan"
 import { userRouter } from "./routes/user.routes.js";
-import { adminOrderRouter } from "./routes/adminOrder.routes.js";
 import { cartRouter } from "./routes/cart.routes.js";
 import { cartItemRouter } from "./routes/cartItem.routes.js";
 import { orderRouter } from "./routes/order.routes.js";
@@ -31,7 +30,6 @@ app.use(morgan('default'))
 app.use(cookieParser())
 
 app.use('/user', userRouter)
-app.use('/admin/order', adminOrderRouter)
 app.use('/cart', cartRouter)
 app.use('/cartitem', cartItemRouter)
 app.use('/order', orderRouter)

@@ -5,7 +5,7 @@ const orderSchema = new Schema({
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     orderItem: [{ type: mongoose.Schema.Types.ObjectId, ref: "OrderItem" }],
     orderDate: { type: Date, required: true, default: Date.now() },
-    deliveryDate: { type: Date },
+    deliveredDate: { type: Date },
     shippingAddress: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
     paymentDetails: {
         paymentMethod: {

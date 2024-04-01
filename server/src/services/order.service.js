@@ -73,7 +73,7 @@ export const createOrder = async (user, body) => {
         const savedOrder = await createdOrder.save();
 
         const delCartItem = cart?.cartItem?.map((ele) => ele._id);
-        
+
         for (let id of delCartItem) {
             const findCartItem = await findCartItemById(id);
             const product = await findProductById(findCartItem?.product[0]?._id)
@@ -103,7 +103,6 @@ export const createOrder = async (user, body) => {
         }
     }
 }
-
 
 export const findOrderById = async (orderId) => {
     const order = await Order.findById(orderId)
@@ -137,42 +136,48 @@ export const findAllUserOrder = async (userId) => {
     return findAllOrder;
 }
 
-export const placeOrder = async (orderId) => {
-    const order = await findOrderById(orderId);
-
-    order.orderStatus = "PLACED";
-    order.paymentDetails.paymentStatus = "COMPLETED";
-
-    return await order.save()
-}
 
 export const confirmOrder = async (orderId) => {
     const order = await findOrderById(orderId);
+    
+    order.orderStatus = "Confirmed";
+    await order.save()
+    return "Order Confirmed Successfully"
+}
 
-    order.orderStatus = "CONFIRM";
-    return await order.save()
+export const packedOrder = async (orderId) => {
+    const order = await findOrderById(orderId);
+
+    order.orderStatus = "Packed";
+    await order.save()
+    return "Order Packed Successfully"
 }
 
 export const shipOrder = async (orderId) => {
     const order = await findOrderById(orderId);
 
-    order.orderStatus = "SHIPPED";
-    return await order.save()
+    order.orderStatus = "Shipped";
+    await order.save()
+    return "Order Shipped Successfully"
 }
 
 export const deliverOrder = async (orderId) => {
     const order = await findOrderById(orderId);
 
-    order.orderStatus = "DELIVERED";
-    return await order.save()
+    order.orderStatus = "Delivered";
+    order.paymentDetails.paymentStatus = "COMPLETED"
+    order.deliveredDate = new Date();
+    await order.save()
+    return "Order Delivered Successfully"
 }
 
 export const removeOrder = async (orderId) => {
     const order = await Order.findById(orderId);
-    await Order.findByIdAndDelete(orderId);
     for (let id of order.orderItem) {
         await OrderItem.findByIdAndDelete(id);
     }
+    await Order.findByIdAndDelete(orderId);
+
     if (order) {
         return "Order removed successfully"
     } else {
@@ -193,23 +198,19 @@ export const cancelOrder = async (user, orderId) => {
         }
     })
 
-    await Product.updateOne({ _id: order.orderItem[0]?.product[0]?._id }, { quantity: order.orderItem[0]?.product[0].quantity + order.orderItem[0]?.quantity })
-
+    order.paymentDetails.paymentStatus = "CANCELLED"
     order.orderStatus = "CANCELLED";
-    // order.orderItem[0].product[0].quantity = order.orderItem[0].product[0].quantity + order.orderItem[0].quantity
+    order.deliveredDate = "";
     await order.save()
+    await Product.updateOne({ _id: order.orderItem[0]?.product[0]?._id }, { quantity: order.orderItem[0]?.product[0].quantity + order.orderItem[0]?.quantity })
     return "Order Successfully Canceled"
 }
 
 export const userOrderHistory = async (userId) => {
-    try {
-        const orders = await Order.find({ user: userId, orderStatus: "PLACED" })
-            .populate({ path: "OrderItem", populate: { path: "Product" } }).lean()
+    const orders = await Order.find({ user: userId, orderStatus: "PLACED" })
+        .populate({ path: "OrderItem", populate: { path: "Product" } }).lean()
 
-        return orders;
-    } catch (error) {
-        throw new Error(error.message)
-    }
+    return orders;
 }
 
 export const getAllOrder = async () => {
@@ -217,9 +218,5 @@ export const getAllOrder = async () => {
         .populate({ path: "OrderItem", populate: { path: "Product" } }).lean()
 }
 
-export const deleteOrder = async (orderId) => {
-    const order = await findOrderById(orderId);
-    await Order.findByIdAndDelete(order._id)
-}
 
 

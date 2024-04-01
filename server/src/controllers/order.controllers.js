@@ -1,4 +1,4 @@
-import { cancelOrder, checkProductQuantityAvailable, createOrder, findAllOrder, findAllUserOrder, findOrderById, removeOrder, userOrderHistory } from "../services/order.service.js";
+import { cancelOrder, checkProductQuantityAvailable, confirmOrder, createOrder, deliverOrder, findAllOrder, findAllUserOrder, findOrderById, packedOrder, removeOrder, shipOrder, userOrderHistory } from "../services/order.service.js";
 
 export const createOrderController = async (req, res) => {
     const user = req.user;
@@ -14,7 +14,7 @@ export const CancelOrderController = async (req, res) => {
     const user = req.user;
     const { orderId } = req.params;
     try {
-        const cncelOrder = await cancelOrder(user,orderId)
+        const cncelOrder = await cancelOrder(user, orderId)
         return res.status(201).send(cncelOrder);
     } catch (error) {
         return res.status(500).send({ msg: error.message });
@@ -65,6 +65,50 @@ export const orderHistoryController = async (req, res) => {
     try {
         const orderHis = await userOrderHistory(user._id);
         return res.status(200).send(orderHis);
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const confirmOrderController = async (req, res) => {
+    const user = req.user;
+    const { id } = req.params;
+    try {
+        const order = await confirmOrder(id);
+        return res.status(200).send(order);
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const packedOrderController = async (req, res) => {
+    const user = req.user;
+    const { id } = req.params;
+    try {
+        const order = await packedOrder(id);
+        return res.status(200).send(order);
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const shipOrderController = async (req, res) => {
+    const user = req.user;
+    const { id } = req.params;
+    try {
+        const order = await shipOrder(id);
+        return res.status(200).send(order);
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const deliverOrderController = async (req, res) => {
+    const user = req.user;
+    const { id } = req.params;
+    try {
+        const order = await deliverOrder(id);
+        return res.status(200).send(order);
     } catch (error) {
         return res.status(500).send({ msg: error.message });
     }
