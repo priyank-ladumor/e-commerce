@@ -35,10 +35,6 @@ app.use(express.static(".././public"))
 app.use(morgan('default'))
 app.use(cookieParser())
 
-
-app.use("/",(req,res)=>{
-    res.json("working finely")
-})
 app.use('/user', userRouter)
 app.use('/cart', cartRouter)
 app.use('/cartitem', cartItemRouter)
