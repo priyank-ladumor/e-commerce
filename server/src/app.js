@@ -16,18 +16,22 @@ import { addressRouter } from "./routes/address.routes.js";
 import { bannerRouter } from "./routes/banner.routes.js";
 import { logoRouter } from "./routes/logo.routes.js";
 
-
 const app = express()
+
+
 
 app.use(cors({
     // origin: process.env.CORS_ORIGIN,
     credentials: true
 }))
+
 app.use(express.json({ limit: "15mb" }))
 app.use(express.urlencoded({ limit: "15mb", extended: true }))
 app.use(express.static(".././public"))
 app.use(morgan('default'))
 app.use(cookieParser())
+
+
 
 app.use('/user', userRouter)
 app.use('/cart', cartRouter)
@@ -61,3 +65,4 @@ app.use('/logo', logoRouter)
 // //cloudinary upload
 
 export { app }
+
