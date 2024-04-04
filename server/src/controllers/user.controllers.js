@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import handlebars from "handlebars"
 import { sendEmail } from "../services/email.service.js";
 import { createCart } from "../services/cart.service.js";
-
+import path from "path";
 
 
 const createUser = async (req, res) => {
@@ -29,13 +29,14 @@ const createUser = async (req, res) => {
             const token = generateToken(user._id);
             await user.save();
             if (user) {
-                const source = await fs.readFileSync('././public/email-templates/verificationAccount.html', 'utf-8').toString();
-                const template = await handlebars.compile(source)
+                const filePath = path.resolve(process.cwd(), 'public', 'email-templates', 'verificationAccount.html');
+                const source = fs.readFileSync(filePath, 'utf-8').toString();
+                const template = handlebars.compile(source)
                 const replacement = {
                     link: `${location}/user/verified/${token}`,
                     name: user.firstName
                 }
-                const email_template = await template(replacement)
+                const email_template = template(replacement)
                 const subject = "Verification Account"
 
                 const items = {
