@@ -8,7 +8,6 @@ export const createRating = async (req, user) => {
         product: product._id,
         user: user._id,
         rating: req.rating,
-        createdAt: new Date()
     })
 
     return await rating.save();
