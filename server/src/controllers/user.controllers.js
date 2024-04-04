@@ -2,11 +2,9 @@ import { User } from "../models/user.models.js";
 import bcrypt from "bcrypt"
 import { getUserIdFromToken, generateToken } from "../middlewares/jwtProvider.js"
 import { findUserByEmail, findUserById, findUserByToken, resetPassword, userDeleteById, userProfileUpdate } from "../services/user.service.js";
-import * as fs from 'fs';
 import handlebars from "handlebars"
 import { sendEmail } from "../services/email.service.js";
 import { createCart } from "../services/cart.service.js";
-import path from "path";
 
 
 const createUser = async (req, res) => {
@@ -24,8 +22,8 @@ const createUser = async (req, res) => {
             return res.status(400).send({ msg: "user email address is already used" });
         } else {
 
-            const emailTemplate = 
-            `
+            const emailTemplate =
+                `
             <!DOCTYPE html>
 
             <head>
@@ -171,9 +169,6 @@ const createUser = async (req, res) => {
             const token = generateToken(user._id);
             await user.save();
             if (user) {
-                // const filePath = path.resolve(process.cwd(), 'public', 'email-templates', 'verificationAccount.html');
-                // const source = fs.readFileSync(filePath, 'utf-8').toString();
-                // const template = handlebars.compile(source)
                 const compiledTemplate = handlebars.compile(emailTemplate);
 
                 const replacement = {
@@ -181,7 +176,6 @@ const createUser = async (req, res) => {
                     name: user.firstName
                 }
                 const email_template = compiledTemplate(replacement)
-                // const email_template = template(replacement)
                 const subject = "Verification Account"
 
                 const items = {

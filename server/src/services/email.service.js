@@ -4,7 +4,6 @@ import nodemailer from "nodemailer";
 
 export const sendEmail = async (items) => {
     const email = items.email;
-    console.log(email, "email");
     var findUser = await findUserByEmail(email)
 
     if (findUser) {
