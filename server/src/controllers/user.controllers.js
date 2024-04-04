@@ -10,7 +10,7 @@ import { createCart } from "../services/cart.service.js";
 
 
 const createUser = async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, location } = req.body;
     const items = {
         firstName,
         lastName,
@@ -32,7 +32,7 @@ const createUser = async (req, res) => {
                 const source = await fs.readFileSync('././public/email-templates/verificationAccount.html', 'utf-8').toString();
                 const template = await handlebars.compile(source)
                 const replacement = {
-                    link: `http://localhost:3000/user/verified/${token}`,
+                    link: `${location}/user/verified/${token}`,
                     name: user.firstName
                 }
                 const email_template = await template(replacement)
