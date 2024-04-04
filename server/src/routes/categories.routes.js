@@ -1,6 +1,6 @@
 
 import express from "express"
-import { getTopLevelCategoryController, getThirdLevelCategoryController, getSecondLevelCategoryController, delteCategoryByIdController, EditCategoryByIdController, createTopLvlCategoryController, createSecondLvlCategoryController, createThirdLvlCategoryController, getSearchCategoryController, getThirdLevelCategoryUseInFilterController } from "../controllers/categories.controllers.js";
+import { getTopLevelCategoryController, getThirdLevelCategoryController, getSecondLevelCategoryController, delteCategoryByIdController, EditCategoryByIdController, createTopLvlCategoryController, createSecondLvlCategoryController, createThirdLvlCategoryController, getSearchCategoryController, getThirdLevelCategoryUseInFilterController, getNavBarCategoriesByTopController } from "../controllers/categories.controllers.js";
 const categoriesRouter = express.Router()
 
 categoriesRouter
@@ -14,5 +14,6 @@ categoriesRouter
     .post("/toplevel/create", createTopLvlCategoryController)
     .post("/secondlevel/create", createSecondLvlCategoryController)
     .post("/thirdlevel/create", createThirdLvlCategoryController)
+    .post("/navbar", getNavBarCategoriesByTopController)
 
 export { categoriesRouter };

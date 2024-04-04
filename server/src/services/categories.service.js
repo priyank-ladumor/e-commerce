@@ -1,3 +1,4 @@
+import { model } from "mongoose";
 import { Categories } from "../models/category.model.js"
 
 
@@ -153,5 +154,25 @@ export const createThirdLvlCategory = async (req) => {
         }
     } else {
         throw new Error("did not get second and third category")
+    }
+}
+
+export const getNavBarCategoriesByTop = async (req) => {
+    if (req.body.top) {
+        const top = await Categories.findOne({ name: req.body.top })
+        const second = await Categories.find({ parentCategory: top._id, level: 2 })
+
+        const result = []
+        for (let secondData of second) {
+            const third = await Categories.find({ parentCategory: secondData._id, level: 3 })
+            const obj = {
+                name: secondData.name,
+                thirdCategory: third
+            }
+            obj && result.push(obj)
+        }
+        return result;
+    } else {
+        throw new Error("did not get body data")
     }
 }
