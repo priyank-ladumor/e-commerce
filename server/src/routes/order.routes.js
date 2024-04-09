@@ -1,11 +1,12 @@
 
 import express from "express"
 import { authenticate } from "../middlewares/authenticate.js";
-import { CancelOrderController, checkProductQuantityAvailableController, confirmOrderController, createOrderController, deliverOrderController, findAllOrderController, findAllUserOrderController, findOrderByIdController, packedOrderController, removeOrderController, shipOrderController } from "../controllers/order.controllers.js";
+import { CancelOrderController, checkProductQuantityAvailableController, confirmOrderController, createOrderController, deliverOrderController, findAllOrderController, findAllUserOrderController, findOrderByIdController, onlinePaymentSuccessController, packedOrderController, removeOrderController, shipOrderController } from "../controllers/order.controllers.js";
 const orderRouter = express.Router()
 
 orderRouter
     .post("/", authenticate, createOrderController)
+    .post("/payment/success", authenticate, onlinePaymentSuccessController)
     .get("/", authenticate, findAllUserOrderController)
     .get("/all", findAllOrderController)
     .get("/:id", authenticate, findOrderByIdController)

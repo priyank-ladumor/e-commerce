@@ -175,4 +175,23 @@ export const getNavBarCategoriesByTop = async (req) => {
     } else {
         throw new Error("did not get body data")
     }
+    
+    // const level1 = await Categories.find({ level: 1 })
+
+    // const result = []
+
+    // for (let topCategory of level1) {
+    //     const top = await Categories.findOne({ name: topCategory.name })
+    //     const second = await Categories.find({ parentCategory: top._id, level: 2 })
+    //     for (let secondData of second) {
+    //         const third = await Categories.find({ parentCategory: secondData._id, level: 3 })
+
+    //         result.push({
+    //             topCategory: topCategory.name,
+    //             secondCategory: secondData.name,
+    //             thirdCategory: third
+    //         })
+    //     }
+    // }
+    // return result;
 }

@@ -1,10 +1,20 @@
-import { cancelOrder, checkProductQuantityAvailable, confirmOrder, createOrder, deliverOrder, findAllOrder, findAllUserOrder, findOrderById, packedOrder, removeOrder, shipOrder, userOrderHistory } from "../services/order.service.js";
+import { cancelOrder, checkProductQuantityAvailable, confirmOrder, createOrder, deliverOrder, findAllOrder, findAllUserOrder, findOrderById, onlinePaymentSuccess, packedOrder, removeOrder, shipOrder, userOrderHistory } from "../services/order.service.js";
 
 export const createOrderController = async (req, res) => {
     const user = req.user;
     try {
         const createOrderr = await createOrder(user, req.body)
         return res.status(201).send(createOrderr);
+    } catch (error) {
+        return res.status(500).send({ msg: error.message });
+    }
+}
+
+export const onlinePaymentSuccessController = async (req, res) => {
+    const user = req.user;
+    try {
+        const Orderr = await onlinePaymentSuccess(user, req.body.transactionId)
+        return res.status(201).send(Orderr);
     } catch (error) {
         return res.status(500).send({ msg: error.message });
     }

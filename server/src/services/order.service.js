@@ -7,6 +7,9 @@ import { User } from "../models/user.models.js"
 import { Cart } from "../models/cart.models.js"
 import { deleteCartItem, findCartItemById } from "./cartItem.service.js"
 import { findProductById } from "./product.service.js"
+import stripePackage from 'stripe';
+const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
+
 
 export const checkProductQuantityAvailable = async (body) => {
     const { pid, quantity, color, size } = body;
@@ -25,7 +28,7 @@ export const checkProductQuantityAvailable = async (body) => {
 
 
 export const createOrder = async (user, body) => {
-    const { selectedAddress, paymentSys, cartId, cartItemDetails } = body;
+    const { selectedAddress, paymentSys, cartId, cartItemDetails, location } = body;
 
     if (cartItemDetails?.length === 0) {
         throw new Error("cart items not found");
@@ -62,15 +65,57 @@ export const createOrder = async (user, body) => {
             await OrderItems.push(createdOrderItem);
         }
 
-        const createdOrder = new Order({
-            shippingAddress: address,
-            totalPrice: cart.totalPrice,
-            orderItem: OrderItems,
-            totalItem: cart.totalItem,
-            user: cart.user,
-        })
-        createdOrder.paymentDetails.paymentMethod = paymentSys;
-        const savedOrder = await createdOrder.save();
+        let sessionID = []
+
+        if (paymentSys === "CASH") {
+            const createdOrder = new Order({
+                shippingAddress: address,
+                totalPrice: cart.totalPrice,
+                orderItem: OrderItems,
+                totalItem: cart.totalItem,
+                user: cart.user,
+            })
+
+            createdOrder.paymentDetails.paymentMethod = paymentSys;
+            await createdOrder.save();
+        } else {
+            if (paymentSys === "ONLINE") {
+                const lineItems = cartItemDetails?.map((product) => ({
+                    price_data: {
+                        currency: "inr",
+                        product_data: {
+                            name: product.title,
+                            images: product.thumbnail
+                        },
+                        unit_amount: product.price * 100,
+                    },
+                    quantity: product.quantity
+                }));
+
+
+                const session = await stripe.checkout.sessions.create({
+                    payment_method_types: ["card"],
+                    line_items: lineItems,
+                    mode: "payment",
+                    billing_address_collection: 'required',
+                    success_url: `${location}/payment/success`,
+                });
+
+                const createdOrder = new Order({
+                    shippingAddress: address,
+                    totalPrice: cart.totalPrice,
+                    orderItem: OrderItems,
+                    totalItem: cart.totalItem,
+                    user: cart.user,
+                })
+
+                createdOrder.paymentDetails.paymentMethod = paymentSys;
+                createdOrder.paymentDetails.transactionId = session.id;
+                // createdOrder.paymentDetails.paymentStatus = "COMPLETED";
+                sessionID.push({ id: session.id })
+                await createdOrder.save();
+            }
+        }
 
         const delCartItem = cart?.cartItem?.map((ele) => ele._id);
 
@@ -98,10 +143,14 @@ export const createOrder = async (user, body) => {
         //for delete the user cart
         await Cart.findByIdAndDelete(cartId)
 
-        if (savedOrder) {
-            return "Order Created Successfully";
-        }
+        return { msg: "Order Created Successfully", id: sessionID[0]?.id }
     }
+}
+
+export const onlinePaymentSuccess = async (userID, transactionId) => {
+    const orders = await Order.findOne({ user: userID, 'paymentDetails.transactionId': transactionId });
+    orders.paymentDetails.paymentStatus = "COMPLETED";
+    await orders.save();
 }
 
 export const findOrderById = async (orderId) => {
@@ -139,7 +188,7 @@ export const findAllUserOrder = async (userId) => {
 
 export const confirmOrder = async (orderId) => {
     const order = await findOrderById(orderId);
-    
+
     order.orderStatus = "Confirmed";
     await order.save()
     return "Order Confirmed Successfully"
